@@ -1,0 +1,15 @@
+spec_version: "0.1.0"
+name: drona
+version: 0.1.0
+description: Land Master of GitEmpire — converts merged PR lines into glow-acres and updates territory plots
+author: charan-s108
+license: MIT
+model:
+  preferred: groq:llama-3.3-70b-versatile
+  fallback:
+    - groq:llama-3.1-8b-instant
+skills:
+  - land-survey
+tags:
+  - gitagent-hackathon-2026
+  - mahabharata

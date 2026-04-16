@@ -1,0 +1,139 @@
+name: GitEmpire Warriors
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  run-empire:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, '/vibe')) ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true)
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Slash-command routing ──────────────────────────────────────────────
+      - name: Route — vibe-join
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-join')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          USERNAME=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/vibe-join @)\S+')
+          node agents/bhima/skills/vibe-join/scripts/join.js "@$USERNAME"
+
+      - name: Route — vibe-scout
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-scout')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          FILEPATH=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/vibe-scout )\S+')
+          node agents/karna/skills/bug-radar/scripts/scan.js "$FILEPATH" "${{ github.event.comment.user.login }}"
+
+      - name: Route — claim-vibe (manual)
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/claim-vibe')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          PR_NUM=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/claim-vibe #)\d+')
+          # Fetch PR stats from GitHub API
+          PR_DATA=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUM")
+          AUTHOR=$(echo "$PR_DATA" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8'); console.log(JSON.parse(d).user.login)")
+          ADDITIONS=$(echo "$PR_DATA" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8'); console.log(JSON.parse(d).additions || 0)")
+          DELETIONS=$(echo "$PR_DATA" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8'); console.log(JSON.parse(d).deletions || 0)")
+          node agents/drona/skills/land-survey/scripts/claim.js "$PR_NUM" "$AUTHOR" "$ADDITIONS" "$DELETIONS" "false"
+
+      - name: Route — vibe-trade
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-trade')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          AMOUNT=$(echo "${{ github.event.comment.body }}" | grep -oP '\d+(?=gems)')
+          TARGET=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=gems @)\S+')
+          SENDER="${{ github.event.comment.user.login }}"
+          node agents/ashwathama/skills/gem-vault/scripts/trade.js "$SENDER" "$AMOUNT" "@$TARGET"
+
+      - name: Route — vibe-map
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-map')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js map
+
+      - name: Route — leaderboard
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/leaderboard')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard
+
+      # ── Auto-claim on PR merge ─────────────────────────────────────────────
+      - name: Auto-claim merged PR
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.merged == true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          PR_NUM="${{ github.event.pull_request.number }}"
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          ADDITIONS="${{ github.event.pull_request.additions }}"
+          DELETIONS="${{ github.event.pull_request.deletions }}"
+          # Detect test files in changed files list
+          FILES=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUM/files" \
+            | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8'); console.log(JSON.parse(d).map(f=>f.filename).join('\n'))")
+          HAS_TESTS=$(echo "$FILES" | grep -qE '\.(test|spec)\.|_test\.' && echo "true" || echo "false")
+          node agents/drona/skills/land-survey/scripts/claim.js "$PR_NUM" "$AUTHOR" "$ADDITIONS" "$DELETIONS" "$HAS_TESTS"
+
+      # ── Commit updated empire state ────────────────────────────────────────
+      - name: Commit empire state
+        run: |
+          git config user.name "GitEmpire[bot]"
+          git config user.email "gitempire@users.noreply.github.com"
+          git add empire.json
+          git diff --staged --quiet || (git commit -m "⚔️ empire state update [skip ci]" && git push)

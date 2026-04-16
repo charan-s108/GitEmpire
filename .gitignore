@@ -1,0 +1,8 @@
+.env
+.gitagent/
+node_modules/
+dist/
+*.local
+CLAUDE.md
+empire-preview.html
+DEMO.md

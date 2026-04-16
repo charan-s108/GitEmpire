@@ -1,0 +1,48 @@
+spec_version: "0.1.0"
+name: arjuna
+version: 0.1.0
+description: Supreme Commander of GitEmpire — routes vibe commands to Mahabharata sub-agents
+author: charan-s108
+license: MIT
+model:
+  preferred: groq:llama-3.3-70b-versatile
+  fallback:
+    - groq:llama-3.1-8b-instant
+  constraints:
+    temperature: 0.7
+    max_tokens: 2048
+skills:
+  - route-command
+agents:
+  bhima:
+    description: Recruiter — registers warriors, awards starter vibe-gems
+    delegation:
+      mode: explicit
+  karna:
+    description: Bug Scout — scans code diffs, awards gem bounties
+    delegation:
+      mode: explicit
+  drona:
+    description: Land Master — converts merged PRs into glow-acres
+    delegation:
+      mode: explicit
+  ashwathama:
+    description: Treasurer — processes gem transfers, guards war chest
+    delegation:
+      mode: explicit
+  abhimanyu:
+    description: Strategist — generates neon SVG maps and leaderboards
+    delegation:
+      mode: explicit
+delegation:
+  mode: router
+  router: arjuna
+runtime:
+  max_turns: 20
+  timeout: 120
+tags:
+  - hackathon
+  - gitagent-hackathon-2026
+  - mahabharata
+  - vibe-coding
+  - multi-agent

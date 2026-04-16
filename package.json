@@ -1,0 +1,33 @@
+{
+  "name": "gitempire",
+  "version": "1.0.0",
+  "description": "Mahabharata warriors as recursive AI agents — GitAgent Hackathon 2026",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "validate": "gitagent validate . && gitagent validate agents/bhima && gitagent validate agents/karna && gitagent validate agents/drona && gitagent validate agents/ashwathama && gitagent validate agents/abhimanyu",
+    "validate:all": "for d in . agents/bhima agents/karna agents/drona agents/ashwathama agents/abhimanyu; do echo \"--- $d ---\" && gitagent validate $d; done",
+    "dev": "gitclaw run --coordinator arjuna --recursive",
+    "demo": "node scripts/demo.js"
+  },
+  "dependencies": {
+    "clawcontainer": "^1.1.0",
+    "gitclaw": "^1.3.3"
+  },
+  "devDependencies": {
+    "@open-gitagent/gitagent": "^0.2.0"
+  },
+  "keywords": [
+    "gitagent",
+    "gitagent-hackathon-2026",
+    "gitclaw",
+    "clawless",
+    "multi-agent",
+    "mahabharata",
+    "vibe-coding"
+  ],
+  "author": "charan-s108",
+  "license": "MIT"
+}
