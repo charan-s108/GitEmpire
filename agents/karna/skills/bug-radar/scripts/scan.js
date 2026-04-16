@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { applyBadge, formatBadge } = require(path.join(process.cwd(), 'scripts', 'badge'));
 
 // ── ANSI rainbow ──────────────────────────────────────────────────────────────
 
@@ -305,10 +306,18 @@ The dharma code is clean. No bounty awarded.
 
   // Update empire.json
   const empire = readEmpire();
+  let upgraded = false;
   if (invoker && empire.players[`@${invoker}`]) {
-    empire.players[`@${invoker}`].vibe_gems += totalGems;
-    empire.players[`@${invoker}`].last_active = new Date().toISOString();
+    const p = empire.players[`@${invoker}`];
+    p.vibe_gems     += totalGems;
+    p.weekly_gems    = (p.weekly_gems  || 0) + totalGems;
+    p.monthly_gems   = (p.monthly_gems || 0) + totalGems;
+    p.bugs_found     = (p.bugs_found   || 0) + findings.length;
+    const critCount  = findings.filter((f) => f.severity === 'CRITICAL').length;
+    p.critical_bugs_found = (p.critical_bugs_found || 0) + critCount;
+    p.last_active    = new Date().toISOString();
     empire.signals.karna_scanning = false;
+    upgraded = applyBadge(p);
     writeEmpire(empire);
   } else {
     console.warn(`[karna] @${invoker} not registered — gems not awarded. Run /vibe-join first.`);
@@ -325,6 +334,13 @@ The dharma code is clean. No bounty awarded.
     ? `${topPlayer[0]} (${topPlayer[1].vibe_gems} gems, ${topPlayer[1].acres} acres)`
     : 'no warriors yet';
 
+  const invokerPlayer = empire.players[`@${invoker}`];
+  const badgeLine = invokerPlayer
+    ? (upgraded
+        ? `**Badge upgrade:** ${formatBadge(invokerPlayer.badge)} 🎉`
+        : `**Badge:** ${formatBadge(invokerPlayer.badge)}`)
+    : '';
+
   const comment = `## ⚔️ KARNA | BUG SCAN COMPLETE
 
 **File:** \`${filePath}\`
@@ -335,6 +351,7 @@ The dharma code is clean. No bounty awarded.
 ${tableRows}
 
 **Bounty awarded:** ${totalGems} vibe-gems → @${invoker}
+${badgeLine}
 **Empire Status:** ${empireStatus}
 
 ---

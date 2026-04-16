@@ -14,6 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { applyBadge, formatBadge, nextBadgeHint } = require(path.join(process.cwd(), 'scripts', 'badge'));
 
 // ── empire.json helpers ──────────────────────────────────────────────────────
 
@@ -106,6 +107,8 @@ async function main() {
   const now = new Date().toISOString();
   empire.players[`@${username}`] = {
     vibe_gems: 100,
+    weekly_gems: 100,
+    monthly_gems: 100,
     acres: 0,
     plots: [],
     streak: 1,
@@ -113,8 +116,17 @@ async function main() {
     last_active: now,
     wars_won: 0,
     wars_lost: 0,
+    badge: 'shishya',
+    badge_history: [],
+    bugs_found: 0,
+    critical_bugs_found: 0,
+    prs_merged: 0,
   };
   empire.meta.total_warriors += 1;
+
+  // Compute initial badge (100 gems → sainik)
+  const player = empire.players[`@${username}`];
+  applyBadge(player);
 
   writeEmpire(empire);
 
@@ -128,6 +140,8 @@ async function main() {
 
 **Welcome:** @${username} has entered the empire 🌊
 **Starter gems:** 100 vibe-gems deposited to war chest
+**Badge earned:** ${formatBadge(player.badge)}
+**${nextBadgeHint(player)}**
 **Empire Status:** ${empireStatus}
 
 ---

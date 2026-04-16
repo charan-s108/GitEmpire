@@ -12,6 +12,7 @@
 const fs   = require('fs');
 const path = require('path');
 const https = require('https');
+const { BADGE_META } = require(path.join(process.cwd(), 'scripts', 'badge'));
 
 // ── Neon palette (ONLY these colors — no deviations) ─────────────────────────
 
@@ -150,8 +151,11 @@ function generateSVG(empire) {
            class="war-border"/>`
       : '';
 
+    const badgeEmoji = (BADGE_META[player.badge] || BADGE_META.shishya).emoji;
+
     return `
     <!-- ${name} -->
+    <g class="hex-cell" data-player="${name}">
     <polygon points="${pts}"
       fill="${color}22"
       stroke="${color}"
@@ -159,15 +163,19 @@ function generateSVG(empire) {
       filter="url(#glow${i})"
     />
     ${warStroke}
-    <text x="${x}" y="${y - 14}" text-anchor="middle"
+    <text x="${x}" y="${y - 20}" text-anchor="middle"
       font-family="monospace" font-size="12" font-weight="bold"
       fill="${color}">@${shortName}</text>
-    <text x="${x}" y="${y + 4}" text-anchor="middle"
+    <text x="${x}" y="${y - 6}" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="${COLORS.dim}">${badgeEmoji} ${(player.badge || 'shishya')}</text>
+    <text x="${x}" y="${y + 8}" text-anchor="middle"
       font-family="monospace" font-size="10"
       fill="${COLORS.text}">💎 ${player.vibe_gems}</text>
-    <text x="${x}" y="${y + 18}" text-anchor="middle"
+    <text x="${x}" y="${y + 22}" text-anchor="middle"
       font-family="monospace" font-size="10"
-      fill="${COLORS.dim}">🌿 ${player.acres} acres</text>`;
+      fill="${COLORS.dim}">🌿 ${player.acres} acres</text>
+    </g>`;
   }).join('\n');
 
   // Empty-state hex if no players
@@ -249,35 +257,47 @@ function generateSVG(empire) {
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 
-function generateLeaderboard(empire) {
+function generateLeaderboard(empire, mode = 'alltime') {
+  const gemField = mode === 'weekly' ? 'weekly_gems' : mode === 'monthly' ? 'monthly_gems' : 'vibe_gems';
+  const modeLabel = mode === 'weekly' ? '📅 This Week' : mode === 'monthly' ? '🗓 This Month' : '🏆 All-time';
+
   const players = Object.entries(empire.players)
-    .sort(([, a], [, b]) => b.vibe_gems - a.vibe_gems || b.acres - a.acres)
-    .slice(0, 5);
+    .sort(([, a], [, b]) => (b[gemField] || 0) - (a[gemField] || 0) || b.acres - a.acres)
+    .slice(0, 10);
 
   if (players.length === 0) {
     return `*No warriors yet. Be the first — \`/vibe-join @you\`*`;
   }
 
-  const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+  const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
   const rows = players.map(([name, p], i) => {
-    const streak = p.streak > 1 ? ` 🔥 ${p.streak}` : '';
-    return `| ${medals[i]} | ${name} | ${p.vibe_gems} | ${p.acres} |${streak} |`;
+    const gems   = p[gemField] || 0;
+    const badge  = (BADGE_META[p.badge] || BADGE_META.shishya).emoji;
+    const streak = p.streak > 1 ? `🔥 ${p.streak}` : '—';
+    return `| ${medals[i]} | ${badge} ${name} | ${gems} | ${p.acres} | ${streak} |`;
   }).join('\n');
 
-  return `| Rank | Warrior | 💎 Vibe-Gems | 🌿 Glow-Acres | Streak |
-|------|---------|------------|------------|--------|
+  return `### ${modeLabel}
+
+| Rank | Warrior | 💎 Gems | 🌿 Acres | Streak |
+|------|---------|--------|--------|--------|
 ${rows}`;
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const mode = (process.argv[2] || 'map').toLowerCase();
+  const arg1 = (process.argv[2] || 'map').toLowerCase();
+  const arg2 = (process.argv[3] || 'alltime').toLowerCase();
+
+  // Support: mapgen.js leaderboard [weekly|monthly|alltime]
+  const mode        = arg1;
+  const lbMode      = ['weekly', 'monthly', 'alltime'].includes(arg2) ? arg2 : 'alltime';
 
   const empire = readEmpire();
 
   if (mode === 'leaderboard') {
-    const table = generateLeaderboard(empire);
+    const table = generateLeaderboard(empire, lbMode);
     const totalWarriors = Object.keys(empire.players).length;
     const topEntry = Object.entries(empire.players)
       .sort(([, a], [, b]) => b.vibe_gems - a.vibe_gems)[0];
@@ -323,12 +343,6 @@ ${table}
   const dashboardUrl = `https://${owner}.github.io/GitEmpire/`;
 
   const comment = `## ⚔️ ABHIMANYU | EMPIRE MAP UPDATED
-
-\`\`\`
- * . * . *
-. * . * .
- * . * . *
-\`\`\`
 
 **Warriors mapped:** ${warriorCount} · **Active wars:** ${activeWarCount}
 **Empire Status:** ${empireStatus}

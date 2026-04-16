@@ -12,6 +12,7 @@
 const fs   = require('fs');
 const path = require('path');
 const https = require('https');
+const { applyBadge, formatBadge } = require(path.join(process.cwd(), 'scripts', 'badge'));
 
 // ── empire.json helpers ───────────────────────────────────────────────────────
 
@@ -140,11 +141,18 @@ The vault does not deal in debt.
 
   empire.players[senderKey].vibe_gems -= amount;
   empire.players[targetKey].vibe_gems += amount;
+  // Gems received count toward weekly/monthly for recipient only
+  empire.players[targetKey].weekly_gems  = (empire.players[targetKey].weekly_gems  || 0) + amount;
+  empire.players[targetKey].monthly_gems = (empire.players[targetKey].monthly_gems || 0) + amount;
   empire.players[senderKey].last_active = new Date().toISOString();
   empire.players[targetKey].last_active = new Date().toISOString();
 
   const senderAfter = empire.players[senderKey].vibe_gems;
   const targetAfter = empire.players[targetKey].vibe_gems;
+
+  // Recompute badges for both parties
+  applyBadge(empire.players[senderKey]);
+  const targetUpgraded = applyBadge(empire.players[targetKey]);
 
   writeEmpire(empire);
 
@@ -154,12 +162,16 @@ The vault does not deal in debt.
   const [topName, topPlayer] = sorted[0];
   const empireStatus = `top warrior: ${topName} (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
+  const upgradeLine = targetUpgraded
+    ? `\n**Badge upgrade for @${targetArg}:** ${formatBadge(empire.players[targetKey].badge)} 🎉`
+    : '';
+
   const comment = `## ⚔️ ASHWATHAMA | GEM TRANSFER COMPLETE
 
 **Transfer:** ${amount} vibe-gems
 **From:** @${senderArg} (was ${senderBefore} → now ${senderAfter} gems)
 **To:** @${targetArg} (was ${targetBefore} → now ${targetAfter} gems)
-**Ledger:** transaction recorded 🌙
+**Ledger:** transaction recorded 🌙${upgradeLine}
 **Empire Status:** ${empireStatus}
 
 ---

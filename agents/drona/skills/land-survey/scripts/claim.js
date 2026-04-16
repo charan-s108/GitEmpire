@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { applyBadge, formatBadge, nextBadgeHint } = require(path.join(process.cwd(), 'scripts', 'badge'));
 
 // ── empire.json helpers ──────────────────────────────────────────────────────
 
@@ -128,7 +129,10 @@ async function main() {
   // Apply changes
   const player = empire.players[`@${author}`];
   player.vibe_gems += gems;
+  player.weekly_gems  = (player.weekly_gems  || 0) + gems;
+  player.monthly_gems = (player.monthly_gems || 0) + gems;
   player.acres += acres;
+  player.prs_merged = (player.prs_merged || 0) + 1;
   player.last_active = new Date().toISOString();
   player.plots.push({
     pr: prNumber,
@@ -140,6 +144,8 @@ async function main() {
     claimed: new Date().toISOString(),
   });
 
+  const upgraded = applyBadge(player);
+
   writeEmpire(empire);
 
   // Leaderboard snapshot
@@ -149,6 +155,10 @@ async function main() {
   const empireStatus = `${topName} leads (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
   const testBadge = hasTests ? '✓' : '✗';
+  const badgeLine = upgraded
+    ? `**Badge upgrade:** ${formatBadge(player.badge)} 🎉`
+    : `**Badge:** ${formatBadge(player.badge)}`;
+
   const comment = `## ⚔️ DRONA | TERRITORY CLAIMED
 
 **Warrior:** @${author}
@@ -156,6 +166,7 @@ async function main() {
 **Formula:** ${linesChanged} × ${hasTests ? '3' : '1'} × ${complexityFactor} = **${gems} vibe-gems**
 **Acres claimed:** ${acres} glow-acres
 **Running total:** ${player.vibe_gems} gems · ${player.acres} acres
+${badgeLine}
 **Empire Status:** ${empireStatus}
 
 ---

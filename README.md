@@ -10,7 +10,6 @@ PRs become land. Bugs become bounties. Every commit echoes through the ages.
 
 [![gitagent spec](https://img.shields.io/badge/gitagent-v0.1.0%20compliant-00d4ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNE0yIDEybDggNCA4LTQiLz48L3N2Zz4=)](https://github.com/open-gitagent/gitagent)
 [![gitclaw](https://img.shields.io/badge/gitclaw-v1.3.3-00ff88?style=for-the-badge)](https://github.com/open-gitagent/gitclaw)
-[![clawless](https://img.shields.io/badge/clawless-compatible-7700ff?style=for-the-badge)](https://github.com/open-gitagent/clawless)
 [![validation](https://img.shields.io/badge/gitagent%20validate-6%2F6%20%E2%9C%93-00ff88?style=for-the-badge)](#validation)
 [![license](https://img.shields.io/badge/license-MIT-ff0066?style=for-the-badge)](LICENSE)
 [![hackathon](https://img.shields.io/badge/GitAgent%20Hackathon-2026-ff6600?style=for-the-badge)](https://github.com/open-gitagent/gitagent)
@@ -229,13 +228,13 @@ This single command runs **8 verification steps** in sequence:
 | Step | What it tests | Pass condition |
 |------|--------------|----------------|
 | 1 | `gitagent validate` on all 6 agents | 6/6 green, 0 warnings |
-| 2 | Bhima registers 3 warriors + rejects duplicate | Duplicate skipped, not double-written |
-| 3 | Drona claims 3 PRs with different complexity factors | Formula correct, duplicate PR blocked |
-| 4 | Karna scans a file — rainbow ANSI to terminal | Findings reported, gems awarded |
-| 5 | Ashwathama executes transfer + rejects overdraft + rejects self-transfer | Balances correct, both rejections clean |
-| 6 | Abhimanyu generates leaderboard + SVG map | No errors, `battle_svg` written to empire.json |
-| 7 | SVG decoded + written to `empire-preview.html` | File openable in browser |
-| 8 | Final state table printed | Ranked correctly by gems |
+| 2 | Bhima registers 3 warriors + rejects duplicate | Duplicate skipped; badge assigned on join |
+| 3 | Drona claims 3 PRs with different complexity factors | Formula correct; `prs_merged` incremented; duplicate PR blocked |
+| 4 | Karna scans a file — rainbow ANSI to terminal | Findings reported; `bugs_found` incremented; badge recomputed |
+| 5 | Ashwathama executes transfer + rejects overdraft + rejects self-transfer | Balances correct; weekly/monthly gems updated; both rejections clean |
+| 6 | Abhimanyu generates all 3 leaderboard modes + SVG map | alltime/weekly/monthly all print; `empire-map.svg` written to disk |
+| 7 | SVG preview HTML generated | `empire-preview.html` openable in browser |
+| 8 | Final state table printed with badges | Ranked correctly; all players have badge + prs_merged fields |
 
 **After `npm run demo` completes:**
 
@@ -268,6 +267,8 @@ node agents/ashwathama/skills/gem-vault/scripts/trade.js sender 50 @receiver
 # Abhimanyu — generate map or leaderboard
 node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js map
 node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard
+node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard weekly
+node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard monthly
 ```
 
 All scripts print the full GitHub comment they *would* post to stdout when `GITHUB_TOKEN` is not set — so you can review every output before going live.
@@ -318,15 +319,11 @@ The `GitEmpire Warriors` workflow triggers within seconds. Bhima posts a reply:
 ```
 ## ⚔️ BHIMA | WARRIOR REGISTERED
 
-  ( )
- (   )
-(     )
- \   /
-  \_/
-
-Welcome: @yourname has entered the empire 🌊
-Starter gems: 100 vibe-gems deposited to war chest
-Empire Status: 1 warriors strong · top warrior: @yourname (100 gems, 0 acres)
+**Welcome:** @yourname has entered the empire 🌊
+**Starter gems:** 100 vibe-gems deposited to war chest
+**Badge earned:** ⚔️ Sainik (सैनिक)
+**Next: 🏹 Veer — earn 400 more gems OR merge 5 more PRs**
+**Empire Status:** 1 warriors strong · top warrior: @yourname (100 gems, 0 acres)
 
 ---
 🎵 flow time · GitEmpire v1.0
@@ -336,14 +333,60 @@ Empire Status: 1 warriors strong · top warrior: @yourname (100 gems, 0 acres)
 
 | Post this comment | What happens |
 |-------------------|-------------|
-| `/vibe-join @user` | Bhima registers the warrior, awards 100 starter gems |
-| `/vibe-scout src/auth.js` | Karna scans the file, posts findings table, awards bounty gems |
-| `/claim-vibe #42` | Drona calculates gems + acres for PR #42, updates empire |
-| `/vibe-trade 50gems @bob` | Ashwathama transfers 50 gems from you to @bob |
-| `/vibe-map` | Abhimanyu generates the neon SVG map, embeds it in a comment |
-| `/leaderboard` | Abhimanyu posts the top-5 rankings table |
+| `/vibe-join @user` | Bhima registers the warrior, awards 100 gems, shows badge + next-tier hint |
+| `/vibe-scout src/auth.js` | Karna scans the file, posts findings table, awards bounty gems, recomputes badge |
+| `/claim-vibe #42` | Drona calculates gems + acres for PR #42, increments prs_merged, recomputes badge |
+| `/vibe-trade 50gems @bob` | Ashwathama transfers 50 gems, recomputes badge for both parties |
+| `/vibe-map` | Abhimanyu writes `empire-map.svg`, commits it, posts link to live dashboard |
+| `/leaderboard` | Abhimanyu posts all-time top-10 rankings table |
+| `/leaderboard weekly` | Abhimanyu posts this week's gem leaders |
+| `/leaderboard monthly` | Abhimanyu posts this month's gem leaders |
 
 PR merged with tests? **Drona triggers automatically** — no command needed.
+
+---
+
+## 🏅 Badge Progression
+
+Every warrior earns a **Mahabharata title** based on their contributions. Badges gate which issues you can claim and show on the live map.
+
+| Badge | Sanskrit | Requirement | Quest Access |
+|-------|----------|-------------|-------------|
+| 📖 **Shishya** | शिष्य | Just joined | `quest:shishya` — docs, typos |
+| ⚔️ **Sainik** | सैनिक | 100+ gems **or** 1 merged PR | `quest:sainik` — beginner code |
+| 🏹 **Veer** | वीर | 500+ gems **or** 5 merged PRs | `quest:veer` — intermediate |
+| 🛡️ **Kshatriya** | क्षत्रिय | 1500+ gems **or** 15 merged PRs | `quest:kshatriya` — advanced |
+| 🔱 **Maharathi** | महारथी | 5000+ gems **or** 30 merged PRs | `quest:maharathi` — expert |
+| ⚡ **Atirathi** | अतिरथी | 10+ critical bugs found (Karna) | All — highest rank |
+
+Badges are computed automatically after every action (join, PR merge, bug scan, gem trade). Upgrades are announced in the warrior's GitHub comment:
+
+```
+**Badge upgrade:** 🏹 Veer (वीर) 🎉
+```
+
+---
+
+## 🗺️ Live Empire Dashboard
+
+The empire map is more than a static image — it's a live, interactive dashboard served via **GitHub Pages**.
+
+**URL:** `https://charan-s108.github.io/GitEmpire/`
+
+| Feature | Details |
+|---------|---------|
+| Live map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
+| Clickable territories | Click any hex → side panel with full player stats, PR history, badge journey |
+| Leaderboard tabs | Toggle between All-time / Monthly / Weekly with one click |
+| Auto-refresh | Fetches latest `empire.json` every 30 seconds — no page reload needed |
+| Works offline | Everything renders client-side from one JSON file |
+
+**Setup:** Repo Settings → Pages → Source: `main` branch, `/docs` folder.
+
+**Weekly / Monthly resets** happen automatically via GitHub Actions cron:
+- Every **Monday midnight UTC** — `weekly_gems` resets to 0
+- Every **1st of the month UTC** — `monthly_gems` resets to 0
+- Manual trigger: Actions → GitEmpire Warriors → Run workflow → `reset_scope: weekly` or `monthly`
 
 ---
 
@@ -432,7 +475,7 @@ GitEmpire is built on **GitAgent v0.1.0** — the git-native agent specification
 | `skills:` as array of kebab-case strings | ✅ Confirmed by AJV |
 | `gitagent-hackathon-2026` tag in every `agent.yaml` | ✅ All 6 agents |
 | `gitagent validate` passes with 0 warnings | ✅ `npm run validate` |
-| ClawLess compatibility (pure Node.js, no native addons) | ✅ `npm run clawless` |
+| ClawLess compatibility (pure Node.js, no native addons) | ✅ Zero native addons |
 | `RULES.md` + `DUTIES.md` per agent (SOD policy) | ✅ Root + all 5 warriors |
 | Single atomic `empire.json` write pattern | ✅ All scripts |
 
@@ -447,9 +490,18 @@ GitEmpire/
 ├── RULES.md                      ← System-wide gem/acres formulas
 ├── DUTIES.md                     ← Root SOD policy + conflict matrix
 ├── AGENTS.md                     ← Fallback reference for non-gitagent tools
-├── empire.json                   ← Shared atomic state
-├── package.json                  ← scripts: validate, dev, demo, clawless
+├── empire.json                   ← Shared atomic state (players, badges, gems, wars)
+├── empire-map.svg                ← Committed neon map (updated by /vibe-map)
+├── package.json                  ← scripts: validate, dev, demo
 ├── .env.example
+│
+├── docs/
+│   └── index.html                ← GitHub Pages live dashboard (interactive map + leaderboard)
+│
+├── scripts/
+│   ├── demo.js                   ← local verification: 8-step full chain
+│   ├── badge.js                  ← shared badge utility (computeBadge, applyBadge, formatBadge)
+│   └── reset-leaderboard.js      ← weekly/monthly gem reset (called by cron workflow)
 │
 ├── skills/
 │   └── route-command/SKILL.md    ← Command parsing + routing table
@@ -459,38 +511,35 @@ GitEmpire/
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │   │   └── skills/vibe-join/
 │   │       ├── SKILL.md
-│   │       └── scripts/join.js   ← register player, award 100 gems
+│   │       └── scripts/join.js   ← register player, badge on join, nextBadgeHint
 │   │
 │   ├── karna/                    ← Bug Scout
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │   │   └── skills/bug-radar/
 │   │       ├── SKILL.md
-│   │       └── scripts/scan.js   ← 15 bug patterns, rainbow ANSI, bounties
+│   │       └── scripts/scan.js   ← 15 bug patterns, rainbow ANSI, badge recompute
 │   │
 │   ├── drona/                    ← Land Master
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │   │   └── skills/land-survey/
 │   │       ├── SKILL.md
-│   │       └── scripts/claim.js  ← gem formula, acres, duplicate guard
+│   │       └── scripts/claim.js  ← gem formula, acres, prs_merged++, badge recompute
 │   │
 │   ├── ashwathama/               ← Treasurer
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │   │   └── skills/gem-vault/
 │   │       ├── SKILL.md
-│   │       └── scripts/trade.js  ← transfer, overdraft guard, war chest
+│   │       └── scripts/trade.js  ← transfer, overdraft guard, badge recompute both parties
 │   │
 │   └── abhimanyu/                ← Strategist
 │       ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │       └── skills/battle-svg/
 │           ├── SKILL.md
-│           └── scripts/mapgen.js ← neon hex SVG, glow filters, leaderboard
-│
-├── scripts/
-│   └── demo.js                   ← local verification: 8-step full chain
+│           └── scripts/mapgen.js ← neon hex SVG, badge icons, 3-mode leaderboard
 │
 └── .github/
     └── workflows/
-        └── gitempire.yml         ← per-step command routing + auto-claim
+        └── gitempire.yml         ← per-step routing + auto-claim + cron resets
 ```
 
 ---
@@ -503,7 +552,6 @@ GitEmpire/
 | `npm run demo` | Full 8-step local verification chain |
 | `npm run demo -- --reset` | Reset empire.json then run full demo |
 | `npm run dev` | `gitclaw run --coordinator arjuna --recursive` |
-| `npm run clawless` | Launch in ClawLess browser runtime |
 
 ---
 
@@ -513,7 +561,6 @@ GitEmpire/
 |-------|--------|-----|
 | Agent spec | [GitAgent v0.1.0](https://github.com/open-gitagent/gitagent) | The hackathon target spec |
 | Runtime | [gitclaw v1.3.3](https://github.com/open-gitagent/gitclaw) | Git-native agent executor |
-| Browser runtime | [clawless](https://github.com/open-gitagent/clawless) | WebContainer WASM — zero server |
 | CI/CD | GitHub Actions | Free, event-driven, native to git |
 | LLM | `groq/llama-3.3-70b-versatile` | Fast inference, generous free tier |
 | Language | Node.js 20 | Clawless-compatible, no native addons |

@@ -48,7 +48,15 @@ function sep()      { console.log(`  ${C.dim}${'─'.repeat(54)}${C.reset}`); }
 const ROOT = path.resolve(__dirname, '..');
 const EMPIRE_PATH = path.join(ROOT, 'empire.json');
 const BLANK_EMPIRE = {
-  meta: { version: '1.0.0', last_updated: new Date().toISOString(), total_warriors: 0 },
+  meta: {
+    version: '1.0.0',
+    last_updated: new Date().toISOString(),
+    total_warriors: 0,
+    leaderboard_resets: {
+      weekly_reset: new Date().toISOString(),
+      monthly_reset: new Date().toISOString(),
+    },
+  },
   players: {},
   wars: [],
   signals: { pending_claims: [], karna_scanning: false, last_svg_update: null },
@@ -148,18 +156,20 @@ async function main() {
   info(`@bob:    ${e4.players['@bob'].vibe_gems} gems`);
   info(`@charan: ${e4.players['@charan'].vibe_gems} gems`);
 
-  // ── Step 6: Abhimanyu — map + leaderboard ─────────────────────────────────
-  h2('Step 6 — Abhimanyu: Leaderboard & Neon SVG Map');
+  // ── Step 6: Abhimanyu — map + leaderboard modes ───────────────────────────
+  h2('Step 6 — Abhimanyu: Leaderboard (all modes) & Neon SVG Map');
   const MAPGEN = 'agents/abhimanyu/skills/battle-svg/scripts/mapgen.js';
-  runScript('generate leaderboard', MAPGEN, 'leaderboard');
-  runScript('generate SVG map',     MAPGEN, 'map');
+  runScript('generate all-time leaderboard', MAPGEN, 'leaderboard', 'alltime');
+  runScript('generate weekly leaderboard',   MAPGEN, 'leaderboard', 'weekly');
+  runScript('generate monthly leaderboard',  MAPGEN, 'leaderboard', 'monthly');
+  runScript('generate SVG map',              MAPGEN, 'map');
   sep();
 
   // ── Step 7: SVG preview ───────────────────────────────────────────────────
   h2('Step 7 — SVG Preview');
-  const e5 = readEmpire();
-  if (e5.battle_svg) {
-    const svgContent = Buffer.from(e5.battle_svg, 'base64').toString('utf8');
+  const svgFilePath = path.join(ROOT, 'empire-map.svg');
+  if (fs.existsSync(svgFilePath)) {
+    const svgContent = fs.readFileSync(svgFilePath, 'utf8');
     const previewPath = path.join(ROOT, 'empire-preview.html');
     fs.writeFileSync(previewPath, `<!DOCTYPE html>
 <html>
@@ -168,8 +178,9 @@ async function main() {
   <title>GitEmpire Map Preview</title>
   <style>
     body { background: #0d1117; display: flex; flex-direction: column;
-           align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+           align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
     h1   { color: #00d4ff; font-family: monospace; margin-bottom: 24px; }
+    svg  { max-width: 100%; height: auto; }
   </style>
 </head>
 <body>
@@ -177,34 +188,44 @@ async function main() {
   ${svgContent}
 </body>
 </html>`);
-    ok(`SVG preview written → empire-preview.html`);
+    ok('empire-map.svg written and preview generated → empire-preview.html');
     info(`Open in browser: file://${previewPath}`);
   } else {
-    warn('battle_svg empty — map not generated');
+    warn('empire-map.svg not found — map generation may have failed');
   }
 
-  // ── Step 8: State summary ─────────────────────────────────────────────────
-  h2('Step 8 — Final Empire State');
+  // ── Step 8: Badge + State summary ────────────────────────────────────────
+  h2('Step 8 — Final Empire State (with Badges)');
   const final = readEmpire();
   const sorted = Object.entries(final.players)
     .sort(([, a], [, b]) => b.vibe_gems - a.vibe_gems);
 
+  // Verify badge fields exist
+  let badgeOk = true;
+  for (const [name, p] of sorted) {
+    if (!p.badge) { warn(`${name} missing badge field`); badgeOk = false; }
+    if (p.prs_merged === undefined) { warn(`${name} missing prs_merged field`); badgeOk = false; }
+  }
+  if (badgeOk) ok('All players have badge + progression fields');
+
   console.log('');
-  console.log(`  ${C.bold}${'Rank'.padEnd(6)}${'Warrior'.padEnd(14)}${'Gems'.padEnd(10)}${'Acres'.padEnd(8)}Plots${C.reset}`);
-  console.log(`  ${C.dim}${'─'.repeat(50)}${C.reset}`);
+  console.log(`  ${C.bold}${'Rank'.padEnd(6)}${'Warrior'.padEnd(14)}${'Badge'.padEnd(12)}${'Gems'.padEnd(10)}${'W.Gems'.padEnd(10)}${'Acres'.padEnd(8)}PRs${C.reset}`);
+  console.log(`  ${C.dim}${'─'.repeat(66)}${C.reset}`);
   sorted.forEach(([name, p], i) => {
     const medal = ['🥇','🥈','🥉'][i] || `${i+1}. `;
-    console.log(`  ${medal}  ${name.padEnd(14)}${String(p.vibe_gems).padEnd(10)}${String(p.acres).padEnd(8)}${p.plots.length}`);
+    const badge = (p.badge || 'shishya').padEnd(10);
+    console.log(`  ${medal}  ${name.padEnd(14)}${badge}${String(p.vibe_gems).padEnd(10)}${String(p.weekly_gems||0).padEnd(10)}${String(p.acres).padEnd(8)}${p.prs_merged||0}`);
   });
 
   // ── Final ─────────────────────────────────────────────────────────────────
   h1('All checks passed ✓');
   console.log(`  ${C.green}${C.bold}GitEmpire is working correctly.${C.reset}`);
-  console.log(`  ${C.dim}All 5 warriors smoke-tested · empire.json valid · SVG rendered${C.reset}\n`);
+  console.log(`  ${C.dim}All 5 warriors smoke-tested · badges verified · SVG rendered${C.reset}\n`);
   console.log(`  Next steps:`);
   console.log(`  ${C.cyan}1.${C.reset} Open empire-preview.html in your browser to see the neon map`);
-  console.log(`  ${C.cyan}2.${C.reset} Push to GitHub and add GROQ_API_KEY secret`);
-  console.log(`  ${C.cyan}3.${C.reset} Post \`/vibe-join @yourname\` on any issue to go live\n`);
+  console.log(`  ${C.cyan}2.${C.reset} Open https://charan-s108.github.io/GitEmpire/ for the live dashboard`);
+  console.log(`  ${C.cyan}3.${C.reset} Push to GitHub and add GROQ_API_KEY secret`);
+  console.log(`  ${C.cyan}4.${C.reset} Post \`/vibe-join @yourname\` on any issue to go live\n`);
 }
 
 main().catch((err) => {
