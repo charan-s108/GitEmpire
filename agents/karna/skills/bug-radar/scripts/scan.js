@@ -281,13 +281,6 @@ async function main() {
     console.log(`${ANSI.green}✓ No bugs detected. The dharma code is clean.${ANSI.reset}\n`);
     const comment = `## ⚔️ KARNA | SCAN COMPLETE — CLEAN
 
-\`\`\`
-  /\\  /\\
- /  \\/  \\
- \\  /\\  /
-  \\/  \\/
-\`\`\`
-
 **File:** \`${filePath}\`
 **Findings:** 0 bugs detected ✓
 
@@ -333,13 +326,6 @@ The dharma code is clean. No bounty awarded.
     : 'no warriors yet';
 
   const comment = `## ⚔️ KARNA | BUG SCAN COMPLETE
-
-\`\`\`
-  /\\  /\\
- /  \\/  \\
- \\  /\\  /
-  \\/  \\/
-\`\`\`
 
 **File:** \`${filePath}\`
 **Findings:** ${findings.length} bug${findings.length !== 1 ? 's' : ''} detected

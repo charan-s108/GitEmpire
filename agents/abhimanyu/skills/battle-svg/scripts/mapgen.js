@@ -287,12 +287,6 @@ async function main() {
 
     const comment = `## ⚔️ ABHIMANYU | EMPIRE LEADERBOARD
 
-\`\`\`
- * . * . *
-. * . * .
- * . * . *
-\`\`\`
-
 ${table}
 
 **Total warriors:** ${totalWarriors}
@@ -308,10 +302,12 @@ ${table}
 
   // mode === 'map'
   const svg = generateSVG(empire);
-  const svgB64 = Buffer.from(svg).toString('base64');
+
+  // Write SVG as a committed file
+  fs.writeFileSync(path.join(process.cwd(), 'empire-map.svg'), svg, 'utf8');
 
   // Update empire.json
-  empire.battle_svg = svgB64;
+  empire.battle_svg = 'empire-map.svg';
   empire.signals.last_svg_update = new Date().toISOString();
   writeEmpire(empire);
 
@@ -323,6 +319,9 @@ ${table}
     ? `@${topEntry[0].replace(/^@/, '')} leads (${topEntry[1].vibe_gems} gems, ${topEntry[1].acres} acres)`
     : 'no warriors yet';
 
+  const [owner] = (process.env.GITHUB_REPOSITORY || 'charan-s108/GitEmpire').split('/');
+  const dashboardUrl = `https://${owner}.github.io/GitEmpire/`;
+
   const comment = `## ⚔️ ABHIMANYU | EMPIRE MAP UPDATED
 
 \`\`\`
@@ -331,10 +330,10 @@ ${table}
  * . * . *
 \`\`\`
 
-<img src="data:image/svg+xml;base64,${svgB64}" alt="GitEmpire map" width="800"/>
-
 **Warriors mapped:** ${warriorCount} · **Active wars:** ${activeWarCount}
 **Empire Status:** ${empireStatus}
+
+🗺 [View live empire map →](${dashboardUrl})
 
 ---
 🎵 *flow time* · *GitEmpire v1.0*`;

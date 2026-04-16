@@ -91,14 +91,6 @@ async function main() {
     const player = empire.players[`@${username}`];
     const comment = `## ⚔️ BHIMA | WARRIOR ALREADY REGISTERED
 
-\`\`\`
-  ( )
- (   )
-(     )
- \\   /
-  \\_/
-\`\`\`
-
 **@${username}** is already a warrior of this empire 🌊
 **Current gems:** ${player.vibe_gems} vibe-gems · **Acres:** ${player.acres}
 
@@ -133,14 +125,6 @@ async function main() {
   const empireStatus = `${empire.meta.total_warriors} warriors strong · top warrior: ${topName} (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
   const comment = `## ⚔️ BHIMA | WARRIOR REGISTERED
-
-\`\`\`
-  ( )
- (   )
-(     )
- \\   /
-  \\_/
-\`\`\`
 
 **Welcome:** @${username} has entered the empire 🌊
 **Starter gems:** 100 vibe-gems deposited to war chest

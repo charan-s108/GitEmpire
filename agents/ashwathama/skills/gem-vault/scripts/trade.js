@@ -123,14 +123,6 @@ The vault does not deal in self-transfers. Send to another warrior.`;
     const deficit = amount - senderBefore;
     const comment = `## ⚔️ ASHWATHAMA | TRANSFER DENIED
 
-\`\`\`
-  [===]
-  |   |
-  [===]
-  |   |
-  [===]
-\`\`\`
-
 **Reason:** @${senderArg} has ${senderBefore} gems. Cannot send ${amount}.
 **Deficit:** ${deficit} vibe-gems short.
 The vault does not deal in debt.
@@ -163,14 +155,6 @@ The vault does not deal in debt.
   const empireStatus = `top warrior: ${topName} (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
   const comment = `## ⚔️ ASHWATHAMA | GEM TRANSFER COMPLETE
-
-\`\`\`
-  [===]
-  |   |
-  [===]
-  |   |
-  [===]
-\`\`\`
 
 **Transfer:** ${amount} vibe-gems
 **From:** @${senderArg} (was ${senderBefore} → now ${senderAfter} gems)

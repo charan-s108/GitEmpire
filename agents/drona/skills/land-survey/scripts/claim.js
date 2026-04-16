@@ -151,13 +151,6 @@ async function main() {
   const testBadge = hasTests ? '✓' : '✗';
   const comment = `## ⚔️ DRONA | TERRITORY CLAIMED
 
-\`\`\`
-  ___
- /   \\
-| ### |
- \\___/
-\`\`\`
-
 **Warrior:** @${author}
 **PR #${prNumber}:** +${linesAdded}/-${linesDeleted} lines · tests ${testBadge}
 **Formula:** ${linesChanged} × ${hasTests ? '3' : '1'} × ${complexityFactor} = **${gems} vibe-gems**
