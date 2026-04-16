@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GitEmpire — Live Map</title>
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --grid:    #1a2332;
+      --accent:  #00d4ff;
+      --green:   #00ff88;
+      --pink:    #ff0066;
+      --purple:  #7700ff;
+      --orange:  #ff6600;
+      --text:    #e6edf3;
+      --dim:     #8b949e;
+      --border:  #30363d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .logo span { color: var(--green); }
+
+    .meta {
+      font-size: 0.75rem;
+      color: var(--dim);
+      text-align: right;
+    }
+
+    .meta strong { color: var(--text); }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .refresh-btn:hover { background: var(--accent)22; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: 1fr 320px; }
+    }
+
+    .card {
+      background: var(--grid);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 10px 16px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: var(--dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-body { padding: 16px; }
+
+    /* ── Map ── */
+    #map-wrap {
+      width: 100%;
+      aspect-ratio: 800 / 520;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #map-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .loading-msg {
+      color: var(--dim);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    /* ── Leaderboard ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th {
+      color: var(--dim);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--border)88;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .rank { font-size: 1rem; }
+
+    .warrior-name {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .gems { color: var(--green); }
+    .acres { color: var(--purple); }
+    .streak { color: var(--orange); }
+
+    .bar-wrap {
+      background: var(--bg);
+      border-radius: 2px;
+      height: 4px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .bar {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--green);
+    }
+
+    /* ── Stats strip ── */
+    .stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--dim);
+    }
+
+    .stats b { color: var(--text); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.7rem;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Error ── */
+    .error {
+      color: var(--pink);
+      font-size: 0.8rem;
+      padding: 16px;
+      text-align: center;
+    }
+
+    /* pulse dot */
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚔️ Git<span>Empire</span></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+    <div class="meta">
+      <span class="live-dot"></span>
+      <span id="last-updated">loading…</span>
+    </div>
+  </div>
+</header>
+
+<div class="grid">
+  <!-- Map -->
+  <div class="card">
+    <div class="card-header">🗺 Empire Map</div>
+    <div class="card-body" style="padding:12px;">
+      <div id="map-wrap">
+        <div class="loading-msg">Booting empire…</div>
+      </div>
+    </div>
+    <div class="stats" id="stats-strip"></div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <div class="card-header">🏆 Leaderboard</div>
+    <div class="card-body" style="padding:0;">
+      <div id="leaderboard-wrap">
+        <div class="loading-msg" style="padding:32px;">Loading warriors…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>🎵 <em>flow time</em> · auto-refreshes every 30s ·
+    <a href="https://github.com/charan-s108/GitEmpire" target="_blank">charan-s108/GitEmpire</a>
+    · GitEmpire v1.0</p>
+</footer>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+
+const REPO  = 'charan-s108/GitEmpire';
+const BRANCH = 'main';
+const EMPIRE_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/empire.json`;
+
+// ── Neon palette ─────────────────────────────────────────────────────────────
+
+const COLORS = {
+  bg:      '#0d1117',
+  grid:    '#1a2332',
+  players: ['#00ff88', '#ff0066', '#00d4ff', '#ffaa00', '#cc44ff', '#ff4444', '#44ffcc', '#ff8800'],
+  neutral: '#7700ff',
+  war:     '#ff6600',
+  text:    '#e6edf3',
+  accent:  '#00d4ff',
+  dim:     '#8b949e',
+};
+
+// ── SVG generation (mirrors mapgen.js) ───────────────────────────────────────
+
+function generateSVG(empire) {
+  const W = 800, H = 520;
+  const players = Object.entries(empire.players)
+    .sort(([, a], [, b]) => b.vibe_gems - a.vibe_gems);
+
+  const HEX_R = 70;
+  const HEX_H = HEX_R * Math.sqrt(3);
+  const COLS  = 4;
+
+  function hexCenter(idx) {
+    const col = idx % COLS;
+    const row = Math.floor(idx / COLS);
+    const x = 100 + col * (HEX_R * 1.75);
+    const y = 120 + row * HEX_H + (col % 2 === 1 ? HEX_H / 2 : 0);
+    return { x, y };
+  }
+
+  function hexPoints(cx, cy, r) {
+    return Array.from({ length: 6 }, (_, i) => {
+      const angle = (Math.PI / 180) * (60 * i);
+      return `${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`;
+    }).join(' ');
+  }
+
+  const activeWars = new Set(
+    (empire.wars || [])
+      .filter(w => w.status === 'active')
+      .flatMap(w => [w.attacker, w.defender])
+  );
+
+  const defs = players.map((_, i) => {
+    const color = COLORS.players[i % COLORS.players.length];
+    return `<filter id="glow${i}" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
+  }).join('');
+
+  const warFilterDef = `<filter id="warGlow" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>`;
+
+  const hexCells = players.map(([name, player], i) => {
+    const color = COLORS.players[i % COLORS.players.length];
+    const { x, y } = hexCenter(i);
+    const pts = hexPoints(x, y, HEX_R - 4);
+    const isAtWar = activeWars.has(name);
+    const displayName = name.replace(/^@/, '');
+    const shortName = displayName.length > 8 ? displayName.slice(0, 7) + '…' : displayName;
+
+    const warStroke = isAtWar
+      ? `<polygon points="${pts}" fill="none" stroke="${COLORS.war}" stroke-width="3"
+           stroke-dasharray="8 4" filter="url(#warGlow)" class="war-border"/>`
+      : '';
+
+    return `
+    <polygon points="${pts}" fill="${color}22" stroke="${color}" stroke-width="2" filter="url(#glow${i})"/>
+    ${warStroke}
+    <text x="${x}" y="${y - 14}" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="${color}">@${shortName}</text>
+    <text x="${x}" y="${y + 4}"  text-anchor="middle" font-family="monospace" font-size="10" fill="${COLORS.text}">💎 ${player.vibe_gems}</text>
+    <text x="${x}" y="${y + 18}" text-anchor="middle" font-family="monospace" font-size="10" fill="${COLORS.dim}">🌿 ${player.acres} acres</text>`;
+  }).join('');
+
+  const emptyHex = players.length === 0 ? `
+    <polygon points="${hexPoints(W/2, H/2-30, HEX_R)}" fill="${COLORS.neutral}22" stroke="${COLORS.neutral}" stroke-width="1.5"/>
+    <text x="${W/2}" y="${H/2-20}" text-anchor="middle" font-family="monospace" font-size="13" fill="${COLORS.neutral}">no warriors yet</text>
+    <text x="${W/2}" y="${H/2-4}"  text-anchor="middle" font-family="monospace" font-size="11" fill="${COLORS.dim}">/vibe-join @you</text>` : '';
+
+  const legendItems = Math.min(players.length, 4);
+  const legendRows = Array.from({ length: legendItems }, (_, i) => {
+    const [name] = players[i];
+    const color = COLORS.players[i % COLORS.players.length];
+    return `<rect x="${16 + i*120}" y="${H-38}" width="10" height="10" fill="${color}" rx="2"/>
+    <text x="${30 + i*120}" y="${H-29}" font-family="monospace" font-size="9" fill="${COLORS.dim}">${name.replace(/^@/,'').slice(0,9)}</text>`;
+  }).join('');
+
+  const warLegend = empire.wars?.some(w => w.status === 'active')
+    ? `<rect x="${W-140}" y="${H-38}" width="10" height="10" fill="${COLORS.war}" rx="2"/>
+       <text x="${W-126}" y="${H-29}" font-family="monospace" font-size="9" fill="${COLORS.dim}">active war</text>`
+    : '';
+
+  const gridLines =
+    Array.from({length:10},(_,i) => `<line x1="0" y1="${52*i}" x2="${W}" y2="${52*i}" stroke="${COLORS.grid}" stroke-width="0.5"/>`).join('') +
+    Array.from({length:16},(_,i) => `<line x1="${50*i}" y1="0" x2="${50*i}" y2="${H}" stroke="${COLORS.grid}" stroke-width="0.5"/>`).join('');
+
+  const warriorCount  = players.length;
+  const activeWarCount = (empire.wars||[]).filter(w=>w.status==='active').length;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    ${defs}
+    ${warFilterDef}
+    <style>
+      @keyframes warPulse {
+        0%   { stroke-dashoffset:0; opacity:1; }
+        50%  { opacity:0.6; }
+        100% { stroke-dashoffset:-24; opacity:1; }
+      }
+      .war-border { animation: warPulse 1.4s linear infinite; }
+    </style>
+  </defs>
+  <rect width="${W}" height="${H}" fill="${COLORS.bg}"/>
+  ${gridLines}
+  <rect x="0" y="0" width="${W}" height="44" fill="${COLORS.grid}"/>
+  <text x="16" y="28" font-family="monospace" font-size="16" font-weight="bold" fill="${COLORS.accent}">⚔️  GitEmpire</text>
+  <text x="${W-16}" y="28" text-anchor="end" font-family="monospace" font-size="11" fill="${COLORS.dim}">${warriorCount} warrior${warriorCount!==1?'s':''} · ${activeWarCount} active war${activeWarCount!==1?'s':''}</text>
+  ${hexCells}
+  ${emptyHex}
+  <rect x="0" y="${H-48}" width="${W}" height="48" fill="${COLORS.grid}88"/>
+  ${legendRows}
+  ${warLegend}
+  <text x="${W-16}" y="${H-10}" text-anchor="end" font-family="monospace" font-size="9" fill="${COLORS.dim}">GitEmpire v1.0 · 🎵 synthwave</text>
+</svg>`;
+}
+
+// ── Leaderboard render ────────────────────────────────────────────────────────
+
+function renderLeaderboard(empire) {
+  const players = Object.entries(empire.players)
+    .sort(([,a],[,b]) => b.vibe_gems - a.vibe_gems || b.acres - a.acres)
+    .slice(0, 10);
+
+  if (players.length === 0) {
+    return `<div class="loading-msg" style="padding:32px;">No warriors yet.<br><code>/vibe-join @you</code></div>`;
+  }
+
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+  const maxGems = players[0][1].vibe_gems || 1;
+
+  const rows = players.map(([name, p], i) => {
+    const pct = Math.round((p.vibe_gems / maxGems) * 100);
+    const streak = p.streak > 1 ? `<span class="streak">🔥 ${p.streak}</span>` : '—';
+    return `<tr>
+      <td class="rank">${medals[i]}</td>
+      <td><span class="warrior-name">${name}</span><div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div></td>
+      <td class="gems">💎 ${p.vibe_gems}</td>
+      <td class="acres">🌿 ${p.acres}</td>
+      <td>${streak}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table>
+    <thead><tr>
+      <th>#</th><th>Warrior</th><th>Gems</th><th>Acres</th><th>Streak</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── Load & render ─────────────────────────────────────────────────────────────
+
+async function load() {
+  document.getElementById('last-updated').textContent = 'refreshing…';
+
+  try {
+    // Cache-bust so we always get the latest empire.json
+    const res = await fetch(`${EMPIRE_URL}?_=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const empire = await res.json();
+
+    // Map
+    const mapWrap = document.getElementById('map-wrap');
+    mapWrap.innerHTML = generateSVG(empire);
+
+    // Leaderboard
+    document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empire);
+
+    // Stats strip
+    const totalWars   = (empire.wars||[]).filter(w=>w.status==='active').length;
+    const totalGems   = Object.values(empire.players).reduce((s,p)=>s+p.vibe_gems,0);
+    const totalAcres  = Object.values(empire.players).reduce((s,p)=>s+p.acres,0);
+    document.getElementById('stats-strip').innerHTML =
+      `<span>👥 <b>${Object.keys(empire.players).length}</b> warriors</span>
+       <span>⚔️ <b>${totalWars}</b> active wars</span>
+       <span>💎 <b>${totalGems}</b> total gems</span>
+       <span>🌿 <b>${totalAcres}</b> total acres</span>`;
+
+    // Timestamp
+    const ts = empire.meta?.last_updated
+      ? new Date(empire.meta.last_updated).toLocaleTimeString()
+      : 'unknown';
+    document.getElementById('last-updated').textContent = `updated ${ts}`;
+
+  } catch (err) {
+    document.getElementById('map-wrap').innerHTML =
+      `<div class="error">Failed to load empire.json<br><small>${err.message}</small></div>`;
+    document.getElementById('last-updated').textContent = 'error';
+    console.error(err);
+  }
+}
+
+// Initial load + auto-refresh every 30s
+load();
+setInterval(load, 30_000);
+</script>
+</body>
+</html>
