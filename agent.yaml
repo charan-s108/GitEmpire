@@ -34,6 +34,10 @@ agents:
     description: Strategist — generates neon SVG maps and leaderboards
     delegation:
       mode: explicit
+  veda:
+    description: Guru of Beginners — guides warriors, explains badges and quests, recommends next steps
+    delegation:
+      mode: explicit
 delegation:
   mode: router
   router: arjuna

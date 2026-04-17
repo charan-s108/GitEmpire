@@ -2,825 +2,923 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GitEmpire — Live Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>GitEmpire — Live War Room</title>
   <style>
     :root {
-      --bg:      #0d1117;
-      --grid:    #1a2332;
-      --accent:  #00d4ff;
-      --green:   #00ff88;
-      --pink:    #ff0066;
-      --purple:  #7700ff;
-      --orange:  #ff6600;
-      --text:    #e6edf3;
-      --dim:     #8b949e;
-      --border:  #30363d;
+      --bg:          #020617;
+      --accent:      #00d4ff;
+      --green:       #00ff88;
+      --pink:        #ff0066;
+      --purple:      #8b5cf6;
+      --purple-neon: #cc44ff;
+      --orange:      #ff6600;
+      --yellow:      #ffaa00;
+      --text:        #e6edf3;
+      --dim:         #8b949e;
+      --border:      rgba(255,255,255,0.07);
+      --danger:      #ff4444;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; width: 100%; overflow: hidden; }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Courier New', Courier, monospace;
-      min-height: 100vh;
-      padding: 24px 16px;
+      font-family: "SF Mono","Fira Code","Cascadia Code","Menlo","Consolas",monospace;
+      letter-spacing: 0.02em;
     }
 
+    #cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    body::after {
+      content: "";
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    .shell {
+      position: relative; z-index: 2;
+      height: 100%; display: flex; flex-direction: column;
+      padding: 12px 16px 8px; gap: 10px;
+    }
+
+    /* ── HEADER ── */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 28px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
+      flex-shrink: 0; position: relative;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 10px 18px; border-radius: 13px;
+      border: 1px solid rgba(0,212,255,0.16);
+      background: radial-gradient(ellipse at 0% 0%, rgba(0,212,255,0.09) 0%, transparent 55%),
+                  radial-gradient(ellipse at 100% 100%, rgba(204,68,255,0.07) 0%, transparent 55%),
+                  rgba(5,14,36,0.92);
+      backdrop-filter: blur(20px); overflow: hidden;
     }
 
-    .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); letter-spacing: 1px; }
-    .logo span { color: var(--green); }
+    header::after {
+      content: ""; position: absolute;
+      top: 0; left: -60%; width: 60%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: beam 4s linear infinite;
+    }
 
-    .meta { font-size: 0.75rem; color: var(--dim); text-align: right; }
-    .meta strong { color: var(--text); }
+    @keyframes beam { 0% { left: -60%; } 100% { left: 140%; } }
+
+    .logo-wrap { display: flex; align-items: center; gap: 11px; position: relative; z-index: 1; }
+
+    .sigil {
+      width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+      border: 1px solid rgba(0,212,255,0.32);
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+      background: radial-gradient(circle at 30% 20%, rgba(0,212,255,0.4), transparent 60%),
+                  radial-gradient(circle at 80% 80%, rgba(204,68,255,0.3), transparent 60%),
+                  rgba(5,14,36,0.9);
+      animation: sigilPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes sigilPulse {
+      0%,100% { box-shadow: 0 0 16px rgba(0,212,255,0.22); }
+      50%      { box-shadow: 0 0 28px rgba(0,212,255,0.44); }
+    }
+
+    .logo-title { display: flex; flex-direction: column; gap: 2px; }
+
+    .logo {
+      font-size: 1.3rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      background: linear-gradient(135deg, #e6edf3 0%, var(--accent) 50%, var(--purple-neon) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .logo-sub { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--dim); }
+
+    .header-right { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px;
+      background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2);
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; color: var(--green);
+    }
+
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+      animation: livePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.5); opacity: 0.3; }
+    }
 
     .refresh-btn {
-      background: none;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      font-family: inherit;
-      font-size: 0.75rem;
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 8px; border: 1px solid rgba(0,212,255,0.28);
+      background: radial-gradient(circle at 0 0, rgba(0,212,255,0.13), transparent 60%), rgba(5,14,36,0.8);
+      color: var(--accent); font-family: inherit; font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
     }
-    .refresh-btn:hover { background: var(--accent)22; }
 
-    /* ── Layout ── */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      max-width: 1100px;
-      margin: 0 auto;
+    .refresh-btn:hover { border-color: var(--accent); box-shadow: 0 0 22px rgba(0,212,255,0.28); transform: translateY(-1px); }
+    .refresh-btn:active { transform: translateY(0); }
+    .refresh-icon { transition: transform 0.4s ease; display: inline-block; }
+    .refresh-btn:hover .refresh-icon { transform: rotate(180deg); }
+
+    /* ── STATS BAR ── */
+    #global-stats {
+      flex-shrink: 0;
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
     }
-    @media (min-width: 860px) { .grid { grid-template-columns: 1fr 340px; } }
 
+    .gstat {
+      padding: 9px 13px; border-radius: 10px;
+      border: 1px solid var(--border); background: rgba(5,14,36,0.7);
+      backdrop-filter: blur(10px); position: relative; overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .gstat:hover { transform: translateY(-2px); }
+
+    .gstat::before {
+      content: ""; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px; border-radius: 10px 10px 0 0;
+    }
+
+    .gstat.s-warriors::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .gstat.s-gems::before     { background: linear-gradient(90deg, var(--green), transparent); }
+    .gstat.s-acres::before    { background: linear-gradient(90deg, var(--purple-neon), transparent); }
+    .gstat.s-wars::before     { background: linear-gradient(90deg, var(--orange), transparent); }
+
+    .gstat-row { display: flex; align-items: center; gap: 7px; }
+    .gstat-icon { font-size: 0.95rem; }
+    .gstat-val { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+    .gstat.s-warriors .gstat-val { color: var(--accent); }
+    .gstat.s-gems .gstat-val     { color: var(--green); }
+    .gstat.s-acres .gstat-val    { color: var(--purple-neon); }
+    .gstat.s-wars .gstat-val     { color: var(--orange); }
+    .gstat-label { font-size: 0.55rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.11em; margin-top: 2px; }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      flex: 1; min-height: 0;
+      display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px;
+    }
+
+    /* ── CARD ── */
     .card {
-      background: var(--grid);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
+      min-height: 0; border-radius: 13px;
+      border: 1px solid var(--border); background: rgba(5,14,36,0.75);
+      backdrop-filter: blur(16px); overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
     }
 
-    .card-header {
-      padding: 10px 16px;
-      font-size: 0.7rem;
-      font-weight: bold;
-      color: var(--dim);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
+    .card::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(0,212,255,0.04), transparent 55%);
+      pointer-events: none;
     }
 
-    .card-body { padding: 16px; }
+    .card-head {
+      flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 14px; border-bottom: 1px solid var(--border); background: rgba(2,6,23,0.5);
+    }
 
-    /* ── Map ── */
-    #map-wrap { width: 100%; aspect-ratio: 800 / 520; }
-    #map-wrap svg { width: 100%; height: 100%; cursor: pointer; }
-    .hex-cell { cursor: pointer; transition: opacity 0.15s; }
-    .hex-cell:hover { opacity: 0.85; }
+    .card-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.17em; color: var(--dim); font-weight: 600; }
+    .card-pill { font-size: 0.56rem; padding: 2px 8px; border-radius: 999px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.16); color: var(--accent); }
+
+    .card-map-body { flex: 1; min-height: 0; padding: 9px 10px; display: flex; flex-direction: column; }
+
+    #map-wrap {
+      flex: 1; min-height: 0; border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--border); background: rgba(2,6,23,1);
+    }
+
+    #map-wrap svg { width: 100%; height: 100%; display: block; cursor: pointer; }
+    .hex-cell { cursor: pointer; }
 
     .loading-msg {
-      color: var(--dim);
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 40px 0;
+      color: var(--dim); font-size: 0.8rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; height: 100%;
     }
 
-    /* ── Tabs ── */
+    .loading-spinner {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid rgba(0,212,255,0.1); border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── LEADERBOARD ── */
     .tabs {
-      display: flex;
-      gap: 4px;
-      padding: 10px 16px 0;
-      border-bottom: 1px solid var(--border);
+      flex-shrink: 0; display: flex; gap: 3px; padding: 7px 9px 5px;
+      border-bottom: 1px solid var(--border); background: rgba(2,6,23,0.5);
     }
-    .tab-btn {
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--dim);
-      font-family: inherit;
-      font-size: 0.75rem;
-      padding: 6px 12px;
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* ── Leaderboard ── */
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    th {
-      color: var(--dim);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 8px 8px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
+    .tab-btn {
+      background: none; border: 1px solid transparent; border-radius: 6px;
+      color: var(--dim); font-family: inherit; font-size: 0.62rem; font-weight: 600;
+      padding: 5px 10px; cursor: pointer; letter-spacing: 0.07em; text-transform: uppercase;
+      transition: all 0.18s ease; white-space: nowrap;
     }
-    td { padding: 8px 8px; border-bottom: 1px solid var(--border)88; vertical-align: middle; }
+
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .tab-btn.active { color: var(--accent); background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.2); box-shadow: 0 0 10px rgba(0,212,255,0.1); }
+
+    #leaderboard-wrap {
+      flex: 1; min-height: 0; overflow-y: auto; padding: 5px 9px 8px;
+      scrollbar-width: thin; scrollbar-color: rgba(0,212,255,0.14) transparent;
+    }
+
+    #leaderboard-wrap::-webkit-scrollbar { width: 3px; }
+    #leaderboard-wrap::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.14); border-radius: 2px; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--dim);
+      padding: 5px 5px 4px; border-bottom: 1px solid var(--border); text-align: left;
+      position: sticky; top: 0; background: rgba(5,14,36,0.98); z-index: 1;
+    }
+
+    td { padding: 6px 5px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
 
-    .rank { font-size: 1rem; }
-    .warrior-name { color: var(--accent); font-weight: bold; }
-    .gems  { color: var(--green); }
-    .acres { color: var(--purple); }
-    .streak { color: var(--orange); }
+    tbody tr { cursor: pointer; transition: background 0.15s; animation: rowIn 0.3s ease both; }
 
-    .bar-wrap { background: var(--bg); border-radius: 2px; height: 4px; width: 100%; margin-top: 4px; }
-    .bar { height: 4px; border-radius: 2px; background: var(--green); }
+    @keyframes rowIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* ── Stats strip ── */
-    .stats {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      font-size: 0.75rem;
-      color: var(--dim);
-    }
-    .stats b { color: var(--text); }
+    tbody tr:nth-child(1)  { animation-delay: 0.04s; }
+    tbody tr:nth-child(2)  { animation-delay: 0.08s; }
+    tbody tr:nth-child(3)  { animation-delay: 0.12s; }
+    tbody tr:nth-child(4)  { animation-delay: 0.16s; }
+    tbody tr:nth-child(5)  { animation-delay: 0.20s; }
+    tbody tr:nth-child(6)  { animation-delay: 0.24s; }
+    tbody tr:nth-child(7)  { animation-delay: 0.28s; }
+    tbody tr:nth-child(8)  { animation-delay: 0.32s; }
+    tbody tr:nth-child(9)  { animation-delay: 0.36s; }
+    tbody tr:nth-child(10) { animation-delay: 0.40s; }
 
-    /* ── Player side panel ── */
-    .panel-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #0d111799;
-      z-index: 100;
-      backdrop-filter: blur(2px);
-    }
-    .panel-overlay.open { display: block; }
+    tbody tr:hover { background: rgba(0,212,255,0.03); }
+    .rank { font-size: 0.85rem; width: 22px; }
+    .warrior-cell { display: flex; flex-direction: column; gap: 2px; }
+    .warrior-name { font-weight: 600; font-size: 0.72rem; white-space: nowrap; }
+    .gem-bar { height: 2px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; }
+    .gem-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .val-gems   { color: var(--green);  font-weight: 600; font-variant-numeric: tabular-nums; font-size: 0.7rem; }
+    .val-acres  { color: var(--purple-neon); font-weight: 500; font-variant-numeric: tabular-nums; font-size: 0.7rem; }
+    .val-streak { color: var(--orange); font-weight: 500; font-size: 0.7rem; }
 
-    .panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: min(420px, 100vw);
-      height: 100vh;
-      background: var(--grid);
-      border-left: 1px solid var(--border);
-      overflow-y: auto;
-      z-index: 101;
-      padding: 24px 20px;
-      transform: translateX(100%);
-      transition: transform 0.25s ease;
-    }
-    .panel.open { transform: translateX(0); }
-
-    .panel-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--dim);
-      font-size: 1rem;
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .panel-close:hover { color: var(--text); border-color: var(--text); }
-
-    .panel-name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: var(--accent);
-      margin-bottom: 4px;
-      padding-right: 36px;
-    }
-    .panel-badge {
-      font-size: 0.8rem;
-      color: var(--dim);
-      margin-bottom: 20px;
-    }
-    .panel-badge span { color: var(--text); }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--border)66;
-      font-size: 0.82rem;
-    }
-    .stat-row:last-of-type { border-bottom: none; }
-    .stat-label { color: var(--dim); }
-    .stat-val   { color: var(--text); font-weight: bold; }
-
-    .panel-section {
-      margin-top: 20px;
-      font-size: 0.7rem;
-      color: var(--dim);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+    /* ── FOOTER ── */
+    footer {
+      flex-shrink: 0; text-align: center; color: var(--dim);
+      font-size: 0.56rem; letter-spacing: 0.06em; padding: 2px 0;
     }
 
-    .pr-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; margin-top: 4px; }
-    .pr-table th {
-      color: var(--dim);
-      font-size: 0.65rem;
-      padding: 4px 6px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
+    footer a { color: rgba(0,212,255,0.65); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+    .fdot { color: rgba(255,255,255,0.1); margin: 0 5px; }
+
+    /* ── PLAYER MODAL ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 900;
+      background: rgba(2,6,23,0.82); backdrop-filter: blur(14px);
+      align-items: center; justify-content: center; padding: 16px;
     }
-    .pr-table td { padding: 5px 6px; border-bottom: 1px solid var(--border)44; }
+
+    .modal-backdrop.open { display: flex; animation: backdropIn 0.2s ease; }
+
+    @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto;
+      border-radius: 18px; border: 1px solid rgba(0,212,255,0.17);
+      background: radial-gradient(ellipse at 10% 0%, rgba(0,212,255,0.09) 0%, transparent 50%),
+                  radial-gradient(ellipse at 90% 100%, rgba(204,68,255,0.07) 0%, transparent 50%),
+                  rgba(5,14,36,0.98);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 70px rgba(0,212,255,0.05);
+      position: relative; animation: modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+      scrollbar-width: thin; scrollbar-color: rgba(0,212,255,0.15) transparent;
+    }
+
+    .modal::-webkit-scrollbar { width: 3px; }
+    .modal::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.15); border-radius: 2px; }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.9) translateY(14px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--purple-neon), transparent);
+      border-radius: 18px 18px 0 0;
+    }
+
+    .modal-close {
+      position: absolute; top: 13px; right: 13px; width: 28px; height: 28px;
+      border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--dim); font-size: 0.8rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease; z-index: 10;
+    }
+
+    .modal-close:hover { background: rgba(255,68,68,0.12); border-color: rgba(255,68,68,0.32); color: var(--danger); transform: rotate(90deg); }
+
+    .modal-hero {
+      padding: 22px 22px 16px; border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+
+    .modal-hero::before {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 50%, rgba(0,212,255,0.06), transparent 60%);
+      pointer-events: none;
+    }
+
+    .modal-hero-top { display: flex; align-items: flex-start; gap: 15px; }
+
+    .modal-badge-ring {
+      width: 60px; height: 60px; border-radius: 14px; flex-shrink: 0;
+      border: 2px solid rgba(0,212,255,0.26);
+      background: radial-gradient(circle at 30% 20%, rgba(0,212,255,0.26), transparent 60%), rgba(5,14,36,0.9);
+      display: flex; align-items: center; justify-content: center; font-size: 1.9rem;
+      animation: heroRingPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes heroRingPulse {
+      0%,100% { box-shadow: 0 0 24px rgba(0,212,255,0.16); }
+      50%      { box-shadow: 0 0 40px rgba(0,212,255,0.3); }
+    }
+
+    .modal-player-name { font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .modal-player-badge { font-size: 0.74rem; color: var(--accent); margin-bottom: 6px; }
+
+    .modal-rank-pill {
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+      border-radius: 999px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
+    }
+
+    .modal-rank-pill.gold   { background: rgba(255,170,0,0.1);   border: 1px solid rgba(255,170,0,0.26);   color: var(--yellow); }
+    .modal-rank-pill.silver { background: rgba(148,163,184,0.07); border: 1px solid rgba(148,163,184,0.17); color: #94a3b8; }
+    .modal-rank-pill.bronze { background: rgba(255,102,0,0.09);   border: 1px solid rgba(255,102,0,0.2);    color: var(--orange); }
+    .modal-rank-pill.other  { background: rgba(139,92,246,0.07);  border: 1px solid rgba(139,92,246,0.17);  color: var(--purple); }
+
+    .modal-stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; padding: 14px 22px; border-bottom: 1px solid var(--border); }
+
+    .mstat {
+      padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border);
+      background: rgba(2,6,23,0.7); position: relative; overflow: hidden; transition: transform 0.2s;
+    }
+
+    .mstat:hover { transform: translateY(-2px); }
+    .mstat::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(0,212,255,0.04), transparent 70%); }
+    .mstat-icon { font-size: 0.9rem; margin-bottom: 3px; }
+    .mstat-val { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+    .mstat-val.c-green  { color: var(--green); }
+    .mstat-val.c-purple { color: var(--purple-neon); }
+    .mstat-val.c-orange { color: var(--orange); }
+    .mstat-val.c-cyan   { color: var(--accent); }
+    .mstat-val.c-pink   { color: var(--pink); }
+    .mstat-val.c-yellow { color: var(--yellow); }
+    .mstat-lbl { font-size: 0.55rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.09em; margin-top: 2px; }
+
+    .modal-section { padding: 13px 22px; border-bottom: 1px solid var(--border); }
+    .modal-section:last-child { border-bottom: none; }
+
+    .section-title {
+      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim);
+      margin-bottom: 9px; display: flex; align-items: center; gap: 7px;
+    }
+
+    .section-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent); }
+
+    .badge-track { display: flex; align-items: center; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .badge-track::-webkit-scrollbar { display: none; }
+    .bt-step { display: flex; align-items: center; flex-shrink: 0; }
+
+    .bt-node {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 6px 8px; border-radius: 8px; min-width: 62px;
+      border: 1px solid rgba(255,255,255,0.06); background: rgba(2,6,23,0.8); transition: all 0.2s;
+    }
+
+    .bt-node.done { border-color: rgba(0,255,136,0.26); background: rgba(0,255,136,0.04); }
+    .bt-node.now  { border-color: rgba(0,212,255,0.42); background: rgba(0,212,255,0.06); box-shadow: 0 0 12px rgba(0,212,255,0.11); }
+    .bt-emoji { font-size: 1.1rem; }
+    .bt-label { font-size: 0.54rem; font-weight: 600; }
+    .bt-node.done .bt-label { color: var(--green); }
+    .bt-node.now  .bt-label { color: var(--accent); }
+    .bt-node:not(.done):not(.now) .bt-label { color: var(--dim); }
+    .bt-san { font-size: 0.48rem; color: var(--dim); }
+    .bt-line { width: 18px; height: 2px; background: rgba(255,255,255,0.06); flex-shrink: 0; }
+    .bt-line.lit { background: linear-gradient(90deg, var(--green), rgba(0,255,136,0.2)); }
+
+    .quest-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.73rem; }
+    .quest-item:last-child { border-bottom: none; }
+    .quest-left { display: flex; align-items: center; gap: 8px; }
+    .quest-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 0.64rem; flex-shrink: 0; }
+    .quest-icon.done   { background: rgba(0,255,136,0.09);  color: var(--green);  border: 1px solid rgba(0,255,136,0.16); }
+    .quest-icon.active { background: rgba(0,212,255,0.07);  color: var(--accent); border: 1px solid rgba(0,212,255,0.16); }
+    .quest-diff { font-size: 0.56rem; }
+    .quest-diff.beginner     { color: var(--green); }
+    .quest-diff.intermediate { color: var(--yellow); }
+    .quest-diff.advanced     { color: var(--orange); }
+    .quest-diff.legendary    { color: var(--pink); }
+    .quest-status { font-size: 0.58rem; padding: 2px 6px; border-radius: 999px; }
+    .quest-status.done   { background: rgba(0,255,136,0.08);  color: var(--green); }
+    .quest-status.active { background: rgba(0,212,255,0.07);  color: var(--accent); }
+
+    .pr-table { width: 100%; border-collapse: collapse; }
+    .pr-table th { font-size: 0.54rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); padding: 4px 6px 6px; border-bottom: 1px solid var(--border); text-align: left; }
+    .pr-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.7rem; }
     .pr-table tr:last-child td { border-bottom: none; }
 
-    .badge-pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.7rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      margin-right: 4px;
-      margin-bottom: 4px;
-    }
+    .badge-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+    .badge-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; font-size: 0.64rem; background: rgba(5,14,36,0.8); border: 1px solid rgba(255,255,255,0.07); color: var(--text); }
 
-    /* ── Quest panel ── */
-    .quest-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border)44;
-      font-size: 0.78rem;
-    }
-    .quest-row:last-child { border-bottom: none; }
-    .quest-done  { color: var(--green); }
-    .quest-active { color: var(--accent); }
-    .quest-avail { color: var(--dim); }
-
-    /* ── Contribution path strip ── */
-    #path-strip {
-      max-width: 1100px;
-      margin: 0 auto 20px;
-      padding: 0 4px;
-    }
-    .path-tier-wrap { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
-    .path-tier {
-      text-align: center;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      min-width: 72px;
-      flex-shrink: 0;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .path-tier.past   { border-color: var(--green); }
-    .path-tier.active { border-color: var(--accent); background: #00d4ff11; }
-    .path-connector { width: 28px; height: 2px; background: var(--border); flex-shrink: 0; }
-    .path-connector.past { background: var(--green); }
-
-    /* ── Badge celebration toast ── */
+    /* ── TOAST ── */
     .badge-toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--grid);
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 200;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: transform 0.35s ease, opacity 0.35s ease;
-      box-shadow: 0 0 24px #00d4ff44;
-      font-size: 0.82rem;
-      max-width: 260px;
+      position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+      display: flex; align-items: center; gap: 11px; padding: 11px 16px;
+      border-radius: 12px; border: 1px solid rgba(0,212,255,0.32);
+      background: radial-gradient(circle at 0 0, rgba(0,212,255,0.16), transparent 60%), rgba(5,14,36,0.97);
+      box-shadow: 0 0 32px rgba(0,212,255,0.22), 0 20px 50px rgba(0,0,0,0.6);
+      max-width: 250px; transform: translateY(100px) scale(0.9); opacity: 0;
+      transition: all 0.36s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .badge-toast.visible { transform: translateY(0); opacity: 1; }
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      color: var(--dim);
-      font-size: 0.7rem;
-      margin-top: 32px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+    .badge-toast.visible { transform: translateY(0) scale(1); opacity: 1; }
+    .toast-emoji { font-size: 1.8rem; flex-shrink: 0; }
+    .toast-name  { font-weight: 700; color: var(--accent); font-size: 0.8rem; }
+    .toast-badge { font-size: 0.68rem; color: var(--green); margin-top: 1px; }
+    .toast-san   { font-size: 0.58rem; color: var(--dim); }
+
+    .error-msg { color: var(--danger); font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; padding: 20px; text-align: center; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 820px) {
+      .shell { padding: 9px 11px 6px; gap: 8px; }
+      .logo-sub { display: none; }
+      .logo { font-size: 1.1rem; }
+      .sigil { width: 34px; height: 34px; font-size: 1.1rem; }
+      .main-grid { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
     }
-    footer a { color: var(--accent); text-decoration: none; }
 
-    /* ── Error ── */
-    .error { color: var(--pink); font-size: 0.8rem; padding: 16px; text-align: center; }
-
-    /* live dot */
-    .live-dot {
-      display: inline-block;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      margin-right: 6px;
-      animation: pulse 2s ease-in-out infinite;
-      vertical-align: middle;
+    @media (max-width: 540px) {
+      .shell { padding: 8px 10px 5px; gap: 7px; }
+      .refresh-label { display: none; }
+      .refresh-btn { padding: 7px 10px; }
+      #global-stats { grid-template-columns: repeat(2,1fr); gap: 6px; }
+      .gstat-label { font-size: 0.5rem; }
+      .main-grid { grid-template-columns: 1fr; grid-template-rows: 1.1fr 1fr; gap: 7px; }
+      .modal-stats-grid { grid-template-columns: repeat(2,1fr); }
+      .modal { border-radius: 14px; }
+      .modal-hero { padding: 16px 14px 12px; }
+      .modal-stats-grid { padding: 10px 14px; }
+      .modal-section { padding: 10px 14px; }
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    @media (max-width: 380px) {
+      .modal-stats-grid { gap: 5px; }
+      .mstat { padding: 7px 8px; }
+      .mstat-val { font-size: 0.9rem; }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">⚔️ Git<span>Empire</span></div>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <button class="refresh-btn" onclick="load()">↻ Refresh</button>
-    <div class="meta">
-      <span class="live-dot"></span>
-      <span id="last-updated">loading…</span>
+<canvas id="cosmos"></canvas>
+
+<div class="shell">
+
+  <header>
+    <div class="logo-wrap">
+      <div class="sigil">⚔️</div>
+      <div class="logo-title">
+        <div class="logo">GitEmpire</div>
+        <div class="logo-sub">Live War Room · 7 Warriors · GitAgent Hackathon 2026</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      <button class="refresh-btn" onclick="load()">
+        <span class="refresh-icon">↻</span>
+        <span class="refresh-label">Sync Now</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="global-stats">
+    <div class="gstat s-warriors">
+      <div class="gstat-row"><span class="gstat-icon">⚔️</span><span class="gstat-val" id="gs-warriors">—</span></div>
+      <div class="gstat-label">Warriors</div>
+    </div>
+    <div class="gstat s-gems">
+      <div class="gstat-row"><span class="gstat-icon">💎</span><span class="gstat-val" id="gs-gems">—</span></div>
+      <div class="gstat-label">Total Gems</div>
+    </div>
+    <div class="gstat s-acres">
+      <div class="gstat-row"><span class="gstat-icon">🌿</span><span class="gstat-val" id="gs-acres">—</span></div>
+      <div class="gstat-label">Glow-Acres</div>
+    </div>
+    <div class="gstat s-wars">
+      <div class="gstat-row"><span class="gstat-icon">🔥</span><span class="gstat-val" id="gs-wars">—</span></div>
+      <div class="gstat-label">Active Wars</div>
     </div>
   </div>
-</header>
 
-<!-- Contribution path strip -->
-<div id="path-strip" style="display:none">
-  <div style="font-size:0.65rem;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">⚔️ Warrior Path</div>
-  <div class="path-tier-wrap" id="path-steps"></div>
-</div>
-
-<div class="grid">
-  <!-- Map -->
-  <div class="card">
-    <div class="card-header">🗺 Empire Map — click a territory to inspect</div>
-    <div class="card-body" style="padding:12px;">
-      <div id="map-wrap"><div class="loading-msg">Booting empire…</div></div>
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">🗺 Empire Map</span>
+        <span class="card-pill">Click a warrior to inspect</span>
+      </div>
+      <div class="card-map-body">
+        <div id="map-wrap">
+          <div class="loading-msg"><div class="loading-spinner"></div>Booting empire…</div>
+        </div>
+      </div>
     </div>
-    <div class="stats" id="stats-strip"></div>
-  </div>
 
-  <!-- Leaderboard -->
-  <div class="card">
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('alltime', this)">🏆 All-time</button>
-      <button class="tab-btn" onclick="switchTab('monthly', this)">🗓 Monthly</button>
-      <button class="tab-btn" onclick="switchTab('weekly', this)">📅 Weekly</button>
-    </div>
-    <div id="leaderboard-wrap">
-      <div class="loading-msg" style="padding:32px;">Loading warriors…</div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('alltime',this)">🏆 All-time</button>
+        <button class="tab-btn" onclick="switchTab('monthly',this)">🗓 Monthly</button>
+        <button class="tab-btn" onclick="switchTab('weekly',this)">📅 Weekly</button>
+      </div>
+      <div id="leaderboard-wrap">
+        <div class="loading-msg"><div class="loading-spinner"></div>Loading warriors…</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Player side panel -->
-<div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
-<div class="panel" id="player-panel">
-  <button class="panel-close" onclick="closePanel()">✕</button>
-  <div class="panel-name" id="panel-name"></div>
-  <div class="panel-badge" id="panel-badge"></div>
-  <div id="panel-stats"></div>
-  <div class="panel-section" id="panel-pr-label" style="display:none">📜 Contribution History</div>
-  <div id="panel-prs"></div>
-  <div class="panel-section" id="panel-badge-label" style="display:none">🏅 Badge Journey</div>
-  <div id="panel-badges"></div>
-  <div class="panel-section" id="panel-quest-label" style="display:none">⚔️ Quest Progress</div>
-  <div id="panel-quests"></div>
-</div>
-
-<footer>
-  <p>🎵 <em>flow time</em> · auto-refreshes every 30s ·
+  <footer>
+    🎵 <em>flow time</em>
+    <span class="fdot">·</span>
+    auto-syncs every 30s
+    <span class="fdot">·</span>
     <a href="https://github.com/charan-s108/GitEmpire" target="_blank">charan-s108/GitEmpire</a>
-    · GitEmpire v1.0</p>
-</footer>
+    <span class="fdot">·</span>
+    GitEmpire v1.0
+  </footer>
+
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+  <div class="modal" id="player-modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-hero">
+      <div class="modal-hero-top">
+        <div class="modal-badge-ring" id="modal-badge-ring">📖</div>
+        <div>
+          <div class="modal-player-name" id="modal-name">@warrior</div>
+          <div class="modal-player-badge" id="modal-badge-label">Shishya (शिष्य)</div>
+          <div id="modal-rank-pill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-stats-grid" id="modal-stats-grid"></div>
+
+    <div class="modal-section">
+      <div class="section-title">🏅 Badge Progression</div>
+      <div class="badge-track" id="modal-badge-track"></div>
+    </div>
+
+    <div class="modal-section" id="modal-quests-section" style="display:none">
+      <div class="section-title">⚔️ Quest Progress</div>
+      <div id="modal-quests"></div>
+    </div>
+
+    <div class="modal-section" id="modal-prs-section" style="display:none">
+      <div class="section-title">📜 Contribution History</div>
+      <div id="modal-prs"></div>
+    </div>
+
+    <div class="modal-section" id="modal-badge-journey-section" style="display:none">
+      <div class="section-title">🎖 Badge Journey</div>
+      <div class="badge-pills" id="modal-badge-journey"></div>
+    </div>
+  </div>
+</div>
+
+<div class="badge-toast" id="badge-toast">
+  <div class="toast-emoji" id="toast-emoji">⚡</div>
+  <div>
+    <div class="toast-name"  id="toast-name"></div>
+    <div class="toast-badge" id="toast-badge"></div>
+    <div class="toast-san"   id="toast-san"></div>
+  </div>
+</div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
-const REPO      = 'charan-s108/GitEmpire';
-const BRANCH    = 'main';
+(function () {
+  const canvas = document.getElementById('cosmos');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars;
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    stars = Array.from({ length: 150 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.0 + 0.2,
+      speed: Math.random() * 0.004 + 0.002,
+      phase: Math.random() * Math.PI * 2,
+    }));
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      const a = 0.1 + 0.45 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,212,255,${a})`; ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  resize(); window.addEventListener('resize', resize); requestAnimationFrame(draw);
+})();
+
+const REPO       = 'charan-s108/GitEmpire';
+const BRANCH     = 'main';
 const EMPIRE_URL = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/empire.json`;
 
-// ── Badge metadata ────────────────────────────────────────────────────────────
 const BADGE_META = {
-  shishya:   { label: 'Shishya',   sanskrit: 'शिष्य',    emoji: '📖', tier: 0 },
-  sainik:    { label: 'Sainik',    sanskrit: 'सैनिक',    emoji: '⚔️',  tier: 1 },
-  veer:      { label: 'Veer',      sanskrit: 'वीर',      emoji: '🏹',  tier: 2 },
-  kshatriya: { label: 'Kshatriya', sanskrit: 'क्षत्रिय', emoji: '🛡️',  tier: 3 },
-  maharathi: { label: 'Maharathi', sanskrit: 'महारथी',   emoji: '🔱',  tier: 4 },
-  atirathi:  { label: 'Atirathi',  sanskrit: 'अतिरथी',   emoji: '⚡',  tier: 5 },
-};
-
-function badgeLabel(key) {
-  const m = BADGE_META[key] || BADGE_META.shishya;
-  return `${m.emoji} ${m.label} (${m.sanskrit})`;
-}
-
-// ── Neon palette ──────────────────────────────────────────────────────────────
-const COLORS = {
-  bg:      '#0d1117',
-  grid:    '#1a2332',
-  players: ['#00ff88','#ff0066','#00d4ff','#ffaa00','#cc44ff','#ff4444','#44ffcc','#ff8800'],
-  neutral: '#7700ff',
-  war:     '#ff6600',
-  text:    '#e6edf3',
-  accent:  '#00d4ff',
-  dim:     '#8b949e',
-};
-
-// ── Quest metadata (client-side mirror) ──────────────────────────────────────
-const QUEST_META = {
-  first_blood:   { name: 'First Blood',      difficulty: 'Beginner' },
-  land_grab:     { name: 'Land Grab',         difficulty: 'Beginner' },
-  test_dharma:   { name: 'Test Dharma',       difficulty: 'Beginner' },
-  bug_scout:     { name: 'Bug Scout',         difficulty: 'Beginner' },
-  war_chest:     { name: 'War Chest',         difficulty: 'Intermediate' },
-  veer_surge:    { name: 'Veer Surge',        difficulty: 'Intermediate' },
-  karna_eye:     { name: "Karna's Eye",       difficulty: 'Advanced' },
-  atirathi_path: { name: "Atirathi's Path",   difficulty: 'Legendary' },
+  shishya:   { label:'Shishya',   sanskrit:'शिष्य',     emoji:'📖', tier:0 },
+  sainik:    { label:'Sainik',    sanskrit:'सैनिक',     emoji:'⚔️',  tier:1 },
+  veer:      { label:'Veer',      sanskrit:'वीर',       emoji:'🏹',  tier:2 },
+  kshatriya: { label:'Kshatriya', sanskrit:'क्षत्रिय',  emoji:'🛡️',  tier:3 },
+  maharathi: { label:'Maharathi', sanskrit:'महारथी',    emoji:'🔱',  tier:4 },
+  atirathi:  { label:'Atirathi',  sanskrit:'अतिरथी',    emoji:'⚡',  tier:5 },
 };
 
 const BADGE_ORDER = ['shishya','sainik','veer','kshatriya','maharathi','atirathi'];
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let empireData     = null;
-let currentTab     = 'alltime';
-let previousBadges = {};  // { '@alice': 'sainik', ... } — for celebration detection
+const QUEST_META = {
+  first_blood:   { name:'First Blood',   diff:'beginner' },
+  land_grab:     { name:'Land Grab',     diff:'beginner' },
+  test_dharma:   { name:'Test Dharma',   diff:'beginner' },
+  bug_scout:     { name:'Bug Scout',     diff:'beginner' },
+  war_chest:     { name:'War Chest',     diff:'intermediate' },
+  veer_surge:    { name:'Veer Surge',    diff:'intermediate' },
+  karna_eye:     { name:"Karna's Eye",   diff:'advanced' },
+  atirathi_path: { name:'Atirathi Path', diff:'legendary' },
+};
 
-// ── SVG generation ────────────────────────────────────────────────────────────
+const NEON = ['#00ff88','#ff0066','#00d4ff','#ffaa00','#cc44ff','#ff4444','#44ffcc','#ff8800'];
+
+let empireData = null, currentTab = 'alltime', previousBadges = {};
+
+function animateCount(el, target, dur = 600) {
+  if (!el) return;
+  const start = performance.now(), from = parseInt(el.textContent.replace(/,/g,'')) || 0;
+  (function step(now) {
+    const t = Math.min((now - start) / dur, 1), e = 1 - Math.pow(1-t,3);
+    el.textContent = Math.round(from + (target - from) * e).toLocaleString();
+    if (t < 1) requestAnimationFrame(step);
+  })(start);
+}
+
 function generateSVG(empire) {
-  const W = 800, H = 520;
-  const players = Object.entries(empire.players)
-    .sort(([,a],[,b]) => b.vibe_gems - a.vibe_gems);
-
-  const HEX_R = 70;
-  const HEX_H = HEX_R * Math.sqrt(3);
-  const COLS  = 4;
+  const W = 800, H = 460;
+  const players = Object.entries(empire.players).sort(([,a],[,b]) => b.vibe_gems - a.vibe_gems);
+  const HEX_R = 66, HEX_H = HEX_R * Math.sqrt(3), COLS = 4;
 
   function hexCenter(idx) {
-    const col = idx % COLS;
-    const row = Math.floor(idx / COLS);
-    return {
-      x: 100 + col * (HEX_R * 1.75),
-      y: 120 + row * HEX_H + (col % 2 === 1 ? HEX_H / 2 : 0),
-    };
+    const col = idx % COLS, row = Math.floor(idx / COLS);
+    return { x: 100 + col*(HEX_R*1.75), y: 110 + row*HEX_H + (col%2===1 ? HEX_H/2 : 0) };
   }
 
   function hexPoints(cx, cy, r) {
-    return Array.from({length:6},(_,i) => {
-      const a = (Math.PI/180)*(60*i);
+    return Array.from({length:6}, (_,i) => {
+      const a = (Math.PI/180)*(60*i-30);
       return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`;
     }).join(' ');
   }
 
-  const activeWars = new Set(
-    (empire.wars||[]).filter(w=>w.status==='active').flatMap(w=>[w.attacker,w.defender])
-  );
+  const activeWars = new Set((empire.wars||[]).filter(w=>w.status==='active').flatMap(w=>[w.attacker,w.defender]));
 
   const defs = players.map((_,i) => {
-    const c = COLORS.players[i%COLORS.players.length];
-    return `<filter id="glow${i}" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    const c = NEON[i%NEON.length];
+    return `<radialGradient id="hg${i}" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="${c}" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="${c}" stop-opacity="0.02"/>
+    </radialGradient>
+    <filter id="gl${i}" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>`;
   }).join('');
 
-  const warFilterDef = `<filter id="warGlow" x="-40%" y="-40%" width="180%" height="180%">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  const warDef = `<filter id="wg" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>`;
 
-  const hexCells = players.map(([name, player], i) => {
-    const color = COLORS.players[i%COLORS.players.length];
-    const {x, y} = hexCenter(i);
-    const pts = hexPoints(x, y, HEX_R - 4);
-    const isAtWar = activeWars.has(name);
-    const displayName = name.replace(/^@/,'');
-    const shortName = displayName.length > 8 ? displayName.slice(0,7)+'…' : displayName;
-    const badgeEmoji = (BADGE_META[player.badge] || BADGE_META.shishya).emoji;
-    const badgeKey   = player.badge || 'shishya';
+  const grid =
+    Array.from({length:12},(_,i)=>`<line x1="0" y1="${40*i}" x2="${W}" y2="${40*i}" stroke="#1a2332" stroke-width="0.5" opacity="0.4"/>`).join('') +
+    Array.from({length:21},(_,i)=>`<line x1="${40*i}" y1="0" x2="${40*i}" y2="${H}" stroke="#1a2332" stroke-width="0.5" opacity="0.4"/>`).join('');
 
-    const warStroke = isAtWar
-      ? `<polygon points="${pts}" fill="none" stroke="${COLORS.war}" stroke-width="3"
-           stroke-dasharray="8 4" filter="url(#warGlow)" class="war-border"/>`
-      : '';
-
-    return `<g class="hex-cell" data-player="${name}" style="cursor:pointer">
-      <polygon points="${pts}" fill="${color}22" stroke="${color}" stroke-width="2" filter="url(#glow${i})"/>
-      ${warStroke}
-      <text x="${x}" y="${y-22}" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="${color}">@${shortName}</text>
-      <text x="${x}" y="${y-7}"  text-anchor="middle" font-family="monospace" font-size="10" fill="${COLORS.dim}">${badgeEmoji} ${badgeKey}</text>
-      <text x="${x}" y="${y+8}"  text-anchor="middle" font-family="monospace" font-size="10" fill="${COLORS.text}">💎 ${player.vibe_gems}</text>
-      <text x="${x}" y="${y+22}" text-anchor="middle" font-family="monospace" font-size="10" fill="${COLORS.dim}">🌿 ${player.acres} acres</text>
+  const hexCells = players.map(([name,p],i) => {
+    const color = NEON[i%NEON.length], {x,y} = hexCenter(i);
+    const pts = hexPoints(x,y,HEX_R-3), isWar = activeWars.has(name);
+    const dispN = name.replace(/^@/,''), shortN = dispN.length>8 ? dispN.slice(0,7)+'…' : dispN;
+    const bEmoji = (BADGE_META[p.badge]||BADGE_META.shishya).emoji;
+    const warAnim = isWar ? `<polygon points="${pts}" fill="none" stroke="#ff6600" stroke-width="2.5" stroke-dasharray="8 4" filter="url(#wg)" class="war-border"/>` : '';
+    return `<g class="hex-cell" data-player="${name}">
+      <polygon points="${pts}" fill="url(#hg${i})" stroke="${color}" stroke-width="1.5" filter="url(#gl${i})"/>
+      ${warAnim}
+      <text x="${x}" y="${y-22}" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="${color}" letter-spacing="1">@${shortN}</text>
+      <text x="${x}" y="${y-8}"  text-anchor="middle" font-family="monospace" font-size="12">${bEmoji}</text>
+      <text x="${x}" y="${y+7}"  text-anchor="middle" font-family="monospace" font-size="10" fill="#e6edf3">💎 ${(p.vibe_gems||0).toLocaleString()}</text>
+      <text x="${x}" y="${y+19}" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">🌿 ${p.acres||0} ac</text>
     </g>`;
   }).join('');
 
-  const emptyHex = players.length === 0 ? `
-    <polygon points="${hexPoints(W/2,H/2-30,HEX_R)}" fill="${COLORS.neutral}22" stroke="${COLORS.neutral}" stroke-width="1.5"/>
-    <text x="${W/2}" y="${H/2-20}" text-anchor="middle" font-family="monospace" font-size="13" fill="${COLORS.neutral}">no warriors yet</text>
-    <text x="${W/2}" y="${H/2-4}"  text-anchor="middle" font-family="monospace" font-size="11" fill="${COLORS.dim}">/vibe-join @you</text>` : '';
+  const empty = players.length===0
+    ? `<polygon points="${hexPoints(W/2,H/2-16,HEX_R)}" fill="#7700ff22" stroke="#7700ff" stroke-width="1.5"/>
+       <text x="${W/2}" y="${H/2-6}" text-anchor="middle" font-family="monospace" font-size="13" fill="#cc44ff">no warriors yet</text>
+       <text x="${W/2}" y="${H/2+10}" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">/vibe-join @you</text>` : '';
 
-  const legendItems = Math.min(players.length, 4);
-  const legendRows = Array.from({length:legendItems},(_,i)=>{
-    const [name] = players[i];
-    const color = COLORS.players[i%COLORS.players.length];
-    return `<rect x="${16+i*120}" y="${H-38}" width="10" height="10" fill="${color}" rx="2"/>
-    <text x="${30+i*120}" y="${H-29}" font-family="monospace" font-size="9" fill="${COLORS.dim}">${name.replace(/^@/,'').slice(0,9)}</text>`;
-  }).join('');
+  const wc = players.length, ac = (empire.wars||[]).filter(w=>w.status==='active').length;
 
-  const warLegend = empire.wars?.some(w=>w.status==='active')
-    ? `<rect x="${W-140}" y="${H-38}" width="10" height="10" fill="${COLORS.war}" rx="2"/>
-       <text x="${W-126}" y="${H-29}" font-family="monospace" font-size="9" fill="${COLORS.dim}">active war</text>`
-    : '';
-
-  const gridLines =
-    Array.from({length:10},(_,i)=>`<line x1="0" y1="${52*i}" x2="${W}" y2="${52*i}" stroke="${COLORS.grid}" stroke-width="0.5"/>`).join('') +
-    Array.from({length:16},(_,i)=>`<line x1="${50*i}" y1="0" x2="${50*i}" y2="${H}" stroke="${COLORS.grid}" stroke-width="0.5"/>`).join('');
-
-  const wc = players.length;
-  const ac = (empire.wars||[]).filter(w=>w.status==='active').length;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" id="empire-svg">
-  <defs>
-    ${defs}${warFilterDef}
-    <style>
-      @keyframes warPulse { 0%{stroke-dashoffset:0;opacity:1}50%{opacity:.6}100%{stroke-dashoffset:-24;opacity:1} }
-      .war-border{animation:warPulse 1.4s linear infinite}
-    </style>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" id="empire-svg" preserveAspectRatio="xMidYMid meet">
+  <defs>${defs}${warDef}
+    <style>@keyframes warPulse{0%{stroke-dashoffset:0;opacity:1}50%{opacity:.5}100%{stroke-dashoffset:-24;opacity:1}}.war-border{animation:warPulse 1.2s linear infinite}</style>
   </defs>
-  <rect width="${W}" height="${H}" fill="${COLORS.bg}"/>
-  ${gridLines}
-  <rect x="0" y="0" width="${W}" height="44" fill="${COLORS.grid}"/>
-  <text x="16" y="28" font-family="monospace" font-size="16" font-weight="bold" fill="${COLORS.accent}">⚔️  GitEmpire</text>
-  <text x="${W-16}" y="28" text-anchor="end" font-family="monospace" font-size="11" fill="${COLORS.dim}">${wc} warrior${wc!==1?'s':''} · ${ac} active war${ac!==1?'s':''}</text>
-  ${hexCells}${emptyHex}
-  <rect x="0" y="${H-48}" width="${W}" height="48" fill="${COLORS.grid}88"/>
-  ${legendRows}${warLegend}
-  <text x="${W-16}" y="${H-10}" text-anchor="end" font-family="monospace" font-size="9" fill="${COLORS.dim}">GitEmpire v1.0 · 🎵 synthwave</text>
+  <rect width="${W}" height="${H}" fill="#020617"/>
+  ${grid}
+  <rect x="0" y="0" width="${W}" height="38" fill="#050e24"/>
+  <text x="13" y="25" font-family="monospace" font-size="12" font-weight="bold" fill="#00d4ff" letter-spacing="2">⚔️  GitEmpire War Room</text>
+  <text x="${W-13}" y="25" text-anchor="end" font-family="monospace" font-size="9" fill="#8b949e">${wc} warrior${wc!==1?'s':''} · ${ac} active war${ac!==1?'s':''}</text>
+  ${hexCells}${empty}
+  <rect x="0" y="${H-28}" width="${W}" height="28" fill="#050e2488"/>
+  <text x="${W-13}" y="${H-9}" text-anchor="end" font-family="monospace" font-size="8" fill="#8b949e">GitEmpire v1.0 · 🎵 flow time</text>
 </svg>`;
 }
 
-// ── Leaderboard ───────────────────────────────────────────────────────────────
 function renderLeaderboard(empire, tab) {
-  const field = tab === 'weekly' ? 'weekly_gems' : tab === 'monthly' ? 'monthly_gems' : 'vibe_gems';
-  const players = Object.entries(empire.players)
-    .sort(([,a],[,b]) => (b[field]||0) - (a[field]||0) || b.acres - a.acres)
-    .slice(0, 10);
-
-  if (players.length === 0) {
-    return `<div class="loading-msg" style="padding:32px;">No warriors yet.<br><code>/vibe-join @you</code></div>`;
-  }
-
+  const field   = tab==='weekly' ? 'weekly_gems' : tab==='monthly' ? 'monthly_gems' : 'vibe_gems';
+  const players = Object.entries(empire.players).sort(([,a],[,b])=>(b[field]||0)-(a[field]||0)||b.acres-a.acres).slice(0,10);
+  if (players.length===0) return `<div class="loading-msg" style="height:120px">No warriors yet.<br><br><code>/vibe-join @you</code></div>`;
   const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
-  const maxGems = players[0][1][field] || 1;
-
-  const rows = players.map(([name, p], i) => {
-    const gems = p[field] || 0;
-    const pct  = Math.round((gems / maxGems) * 100);
-    const badge = (BADGE_META[p.badge] || BADGE_META.shishya).emoji;
-    const streak = p.streak > 1 ? `<span class="streak">🔥${p.streak}</span>` : '—';
-    return `<tr>
+  const maxGems = players[0][1][field]||1;
+  const rows = players.map(([name,p],i) => {
+    const gems=p[field]||0, pct=Math.round((gems/maxGems)*100);
+    const badge=(BADGE_META[p.badge]||BADGE_META.shishya).emoji;
+    const streak=p.streak>1?`<span class="val-streak">🔥${p.streak}</span>`:`<span style="color:var(--dim)">—</span>`;
+    const color=NEON[i%NEON.length];
+    return `<tr onclick="openPlayerModal('${name}')">
       <td class="rank">${medals[i]}</td>
-      <td>
-        <span class="warrior-name">${badge} ${name}</span>
-        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
-      </td>
-      <td class="gems">💎 ${gems}</td>
-      <td class="acres">🌿 ${p.acres}</td>
+      <td><div class="warrior-cell">
+        <span class="warrior-name" style="color:${color}">${badge} ${name}</span>
+        <div class="gem-bar"><div class="gem-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${color},${color}55)"></div></div>
+      </div></td>
+      <td class="val-gems">💎 ${gems.toLocaleString()}</td>
+      <td class="val-acres">🌿 ${p.acres||0}</td>
       <td>${streak}</td>
     </tr>`;
   }).join('');
-
-  return `<table>
-    <thead><tr><th>#</th><th>Warrior</th><th>Gems</th><th>Acres</th><th>Streak</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  return `<table><thead><tr><th>#</th><th>Warrior</th><th>Gems</th><th>Acres</th><th>Streak</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ── Tab switch ────────────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (empireData) {
-    document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, tab);
-  }
+  if (empireData) document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, tab);
 }
 
-// ── Contribution path strip ──────────────────────────────────────────────────
-function renderPathStrip(highlightBadge) {
-  const strip = document.getElementById('path-strip');
-  const steps = document.getElementById('path-steps');
-  if (!strip || !steps) return;
-
-  const hlTier = (BADGE_META[highlightBadge] || BADGE_META.shishya).tier;
-
-  const html = BADGE_ORDER.map((key, i) => {
-    const m    = BADGE_META[key];
-    const past = m.tier < hlTier;
-    const active = key === highlightBadge;
-    const tierClass = past ? 'past' : active ? 'active' : '';
-    const labelColor = past ? 'var(--green)' : active ? 'var(--accent)' : 'var(--dim)';
-    const connector = i < BADGE_ORDER.length - 1
-      ? `<div class="path-connector${past || (active && i < hlTier) ? ' past' : ''}"></div>`
-      : '';
-    return `<div style="display:flex;align-items:center;flex-shrink:0">
-      <div class="path-tier ${tierClass}">
-        <div style="font-size:1rem">${m.emoji}</div>
-        <div style="font-size:0.62rem;color:${labelColor};font-weight:${active?'bold':'normal'}">${m.label}</div>
-        <div style="font-size:0.52rem;color:var(--dim)">${m.sanskrit}</div>
-      </div>${connector}</div>`;
-  }).join('');
-
-  steps.innerHTML = html;
-  strip.style.display = 'block';
-}
-
-// ── Badge celebration toast ───────────────────────────────────────────────────
 function showBadgeCelebration(playerName, newBadge) {
-  const m = BADGE_META[newBadge] || BADGE_META.shishya;
-  const toast = document.createElement('div');
-  toast.className = 'badge-toast';
-  toast.innerHTML = `<span style="font-size:1.6rem">${m.emoji}</span>
-    <div>
-      <div style="font-weight:bold;color:var(--accent)">${playerName}</div>
-      <div style="font-size:0.72rem;color:var(--green)">Promoted to ${m.label}!</div>
-      <div style="font-size:0.68rem;color:var(--dim)">${m.sanskrit}</div>
-    </div>`;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => { toast.classList.add('visible'); });
-  setTimeout(() => {
-    toast.classList.remove('visible');
-    setTimeout(() => toast.remove(), 400);
-  }, 4500);
+  const m = BADGE_META[newBadge]||BADGE_META.shishya, toast = document.getElementById('badge-toast');
+  document.getElementById('toast-emoji').textContent = m.emoji;
+  document.getElementById('toast-name').textContent  = playerName;
+  document.getElementById('toast-badge').textContent = `Promoted to ${m.label}! 🎉`;
+  document.getElementById('toast-san').textContent   = m.sanskrit;
+  toast.classList.add('visible');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('visible'), 4800);
 }
 
-// ── Player panel ──────────────────────────────────────────────────────────────
-function openPanel(playerName) {
+function openPlayerModal(playerName) {
   if (!empireData) return;
-  const p = empireData.players[playerName];
-  if (!p) return;
+  const p = empireData.players[playerName]; if (!p) return;
 
-  const ranked = Object.entries(empireData.players)
-    .sort(([,a],[,b]) => b.vibe_gems - a.vibe_gems)
-    .findIndex(([n]) => n === playerName) + 1;
+  const rank = Object.entries(empireData.players).sort(([,a],[,b])=>b.vibe_gems-a.vibe_gems).findIndex(([n])=>n===playerName)+1;
+  const badge = BADGE_META[p.badge]||BADGE_META.shishya;
 
-  const badge = BADGE_META[p.badge] || BADGE_META.shishya;
+  document.getElementById('modal-badge-ring').textContent  = badge.emoji;
+  document.getElementById('modal-name').textContent        = playerName;
+  document.getElementById('modal-badge-label').textContent = `${badge.label} (${badge.sanskrit})`;
 
-  document.getElementById('panel-name').textContent = playerName;
-  document.getElementById('panel-badge').innerHTML =
-    `Badge: <span>${badge.emoji} ${badge.label} (${badge.sanskrit})</span>`;
+  const rc = rank===1?'gold':rank===2?'silver':rank===3?'bronze':'other';
+  const rm = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':`#${rank}`;
+  document.getElementById('modal-rank-pill').innerHTML = `<span class="modal-rank-pill ${rc}">${rm} Rank ${rank}</span>`;
 
-  document.getElementById('panel-stats').innerHTML = `
-    <div class="stat-row"><span class="stat-label">💎 Total gems</span><span class="stat-val">${p.vibe_gems}</span></div>
-    <div class="stat-row"><span class="stat-label">📅 Weekly gems</span><span class="stat-val">${p.weekly_gems||0}</span></div>
-    <div class="stat-row"><span class="stat-label">🗓 Monthly gems</span><span class="stat-val">${p.monthly_gems||0}</span></div>
-    <div class="stat-row"><span class="stat-label">🌿 Glow-acres</span><span class="stat-val">${p.acres}</span></div>
-    <div class="stat-row"><span class="stat-label">📦 PRs merged</span><span class="stat-val">${p.prs_merged||0}</span></div>
-    <div class="stat-row"><span class="stat-label">🐛 Bugs found</span><span class="stat-val">${p.bugs_found||0}</span></div>
-    <div class="stat-row"><span class="stat-label">🔴 Critical bugs</span><span class="stat-val">${p.critical_bugs_found||0}</span></div>
-    <div class="stat-row"><span class="stat-label">🔥 Streak</span><span class="stat-val">${p.streak}</span></div>
-    <div class="stat-row"><span class="stat-label">⚔️ Wars won</span><span class="stat-val">${p.wars_won}</span></div>
-    <div class="stat-row"><span class="stat-label">🌐 Rank</span><span class="stat-val">#${ranked}</span></div>
-    <div class="stat-row"><span class="stat-label">📅 Joined</span><span class="stat-val">${new Date(p.joined).toLocaleDateString()}</span></div>
+  document.getElementById('modal-stats-grid').innerHTML = `
+    <div class="mstat"><div class="mstat-icon">💎</div><div class="mstat-val c-green">${(p.vibe_gems||0).toLocaleString()}</div><div class="mstat-lbl">Total Gems</div></div>
+    <div class="mstat"><div class="mstat-icon">📅</div><div class="mstat-val c-cyan">${(p.weekly_gems||0).toLocaleString()}</div><div class="mstat-lbl">Weekly Gems</div></div>
+    <div class="mstat"><div class="mstat-icon">🗓</div><div class="mstat-val c-purple">${(p.monthly_gems||0).toLocaleString()}</div><div class="mstat-lbl">Monthly Gems</div></div>
+    <div class="mstat"><div class="mstat-icon">🌿</div><div class="mstat-val c-purple">${p.acres||0}</div><div class="mstat-lbl">Glow-Acres</div></div>
+    <div class="mstat"><div class="mstat-icon">📦</div><div class="mstat-val c-cyan">${p.prs_merged||0}</div><div class="mstat-lbl">PRs Merged</div></div>
+    <div class="mstat"><div class="mstat-icon">🐛</div><div class="mstat-val c-orange">${p.bugs_found||0}</div><div class="mstat-lbl">Bugs Found</div></div>
+    <div class="mstat"><div class="mstat-icon">🔴</div><div class="mstat-val c-pink">${p.critical_bugs_found||0}</div><div class="mstat-lbl">Critical Bugs</div></div>
+    <div class="mstat"><div class="mstat-icon">🔥</div><div class="mstat-val c-orange">${p.streak||1}</div><div class="mstat-lbl">Streak</div></div>
+    <div class="mstat"><div class="mstat-icon">📅</div><div class="mstat-val c-cyan" style="font-size:0.75rem">${new Date(p.joined).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})}</div><div class="mstat-lbl">Joined</div></div>
   `;
 
-  // PR history
-  const prLabel = document.getElementById('panel-pr-label');
-  const prWrap  = document.getElementById('panel-prs');
-  if (p.plots && p.plots.length > 0) {
-    prLabel.style.display = 'block';
-    const rows = p.plots.slice().reverse().map(pl => `<tr>
-      <td>#${pl.pr}</td>
-      <td class="gems">+${pl.gems_earned}</td>
-      <td class="acres">+${pl.acres} ac</td>
-      <td>${pl.lines_changed} lines</td>
-      <td>${pl.has_tests ? '✓' : '✗'}</td>
-    </tr>`).join('');
-    prWrap.innerHTML = `<table class="pr-table">
-      <thead><tr><th>PR</th><th>Gems</th><th>Acres</th><th>Lines</th><th>Tests</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  } else {
-    prLabel.style.display = 'none';
-    prWrap.innerHTML = '';
-  }
+  const hlTier = badge.tier;
+  document.getElementById('modal-badge-track').innerHTML = BADGE_ORDER.map((key,i) => {
+    const m = BADGE_META[key], cls = m.tier<hlTier?'done':key===p.badge?'now':'';
+    const ln = i<BADGE_ORDER.length-1 ? `<div class="bt-line${m.tier<hlTier?' lit':''}"></div>` : '';
+    return `<div class="bt-step"><div class="bt-node ${cls}"><div class="bt-emoji">${m.emoji}</div><div class="bt-label">${m.label}</div><div class="bt-san">${m.sanskrit}</div></div>${ln}</div>`;
+  }).join('');
 
-  // Badge history
-  const badgeLabel = document.getElementById('panel-badge-label');
-  const badgeWrap  = document.getElementById('panel-badges');
-  if (p.badge_history && p.badge_history.length > 0) {
-    badgeLabel.style.display = 'block';
-    badgeWrap.innerHTML = p.badge_history.map(bh => {
-      const m = BADGE_META[bh.badge] || BADGE_META.shishya;
-      return `<span class="badge-pill">${m.emoji} ${m.label}</span>`;
+  const qp = p.quest_progress||{}, qIds = Object.keys(qp), qSec = document.getElementById('modal-quests-section');
+  if (qIds.length>0) {
+    qSec.style.display = 'block';
+    document.getElementById('modal-quests').innerHTML = qIds.map(id => {
+      const q = {name:'First Blood',diff:'beginner',...({first_blood:{name:'First Blood',diff:'beginner'},land_grab:{name:'Land Grab',diff:'beginner'},test_dharma:{name:'Test Dharma',diff:'beginner'},bug_scout:{name:'Bug Scout',diff:'beginner'},war_chest:{name:'War Chest',diff:'intermediate'},veer_surge:{name:'Veer Surge',diff:'intermediate'},karna_eye:{name:"Karna's Eye",diff:'advanced'},atirathi_path:{name:'Atirathi Path',diff:'legendary'}}[id]||{name:id,diff:'beginner'})};
+      const done = qp[id]?.status==='completed', icls = done?'done':'active';
+      return `<div class="quest-item"><div class="quest-left"><div class="quest-icon ${icls}">${done?'✓':'◌'}</div><span>${q.name}</span></div><div style="display:flex;align-items:center;gap:6px"><span class="quest-diff ${q.diff}">${q.diff}</span><span class="quest-status ${icls}">${done?'done':'active'}</span></div></div>`;
     }).join('');
-  } else {
-    badgeLabel.style.display = 'none';
-    badgeWrap.innerHTML = '';
-  }
+  } else { qSec.style.display = 'none'; }
 
-  // Quest progress
-  const questLabel2 = document.getElementById('panel-quest-label');
-  const questWrap   = document.getElementById('panel-quests');
-  const qp = p.quest_progress || {};
-  const questIds = Object.keys(qp);
-  if (questIds.length > 0) {
-    questLabel2.style.display = 'block';
-    questWrap.innerHTML = questIds.map(id => {
-      const q    = QUEST_META[id];
-      const done = qp[id]?.status === 'completed';
-      const cls  = done ? 'quest-done' : 'quest-active';
-      const icon = done ? '✓' : '◌';
-      return `<div class="quest-row">
-        <span class="${cls}">${icon} ${q ? q.name : id}</span>
-        <span style="color:var(--dim);font-size:0.7rem">${done ? 'done' : 'active'}</span>
-      </div>`;
+  const prSec = document.getElementById('modal-prs-section');
+  if (p.plots&&p.plots.length>0) {
+    prSec.style.display = 'block';
+    document.getElementById('modal-prs').innerHTML = `<table class="pr-table"><thead><tr><th>PR</th><th>Gems</th><th>Acres</th><th>Lines</th><th>Tests</th></tr></thead><tbody>${
+      p.plots.slice().reverse().map(pl=>`<tr><td style="color:var(--accent)">#${pl.pr}</td><td class="val-gems">+${pl.gems_earned}</td><td class="val-acres">+${pl.acres}ac</td><td style="color:var(--dim)">${pl.lines_changed}L</td><td style="color:${pl.has_tests?'var(--green)':'var(--danger)'}">${pl.has_tests?'✓':'✗'}</td></tr>`).join('')
+    }</tbody></table>`;
+  } else { prSec.style.display = 'none'; }
+
+  const bjSec = document.getElementById('modal-badge-journey-section');
+  if (p.badge_history&&p.badge_history.length>0) {
+    bjSec.style.display = 'block';
+    document.getElementById('modal-badge-journey').innerHTML = p.badge_history.map(bh => {
+      const m = BADGE_META[bh.badge]||BADGE_META.shishya;
+      const date = bh.earned_at ? new Date(bh.earned_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+      return `<div class="badge-pill">${m.emoji} ${m.label}${date?`<span style="color:var(--dim);font-size:0.56rem">${date}</span>`:''}</div>`;
     }).join('');
-  } else {
-    questLabel2.style.display = 'none';
-    questWrap.innerHTML = '';
-  }
+  } else { bjSec.style.display = 'none'; }
 
-  // Contribution path strip
-  renderPathStrip(p.badge || 'shishya');
-
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('player-panel').classList.add('open');
+  document.getElementById('player-modal').scrollTop = 0;
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function closePanel() {
-  document.getElementById('overlay').classList.remove('open');
-  document.getElementById('player-panel').classList.remove('open');
+function openPanel(n) { openPlayerModal(n); }
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+function handleBackdropClick(e) {
+  if (e.target===document.getElementById('modal-backdrop')) closeModal();
+}
 
-// ── Load & render ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
 async function load() {
-  document.getElementById('last-updated').textContent = 'refreshing…';
   try {
     const res = await fetch(`${EMPIRE_URL}?_=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const newData = await res.json();
 
-    // Badge celebration — detect upgrades vs previous load
-    const newBadges = {};
-    for (const [name, p] of Object.entries(newData.players || {})) {
-      newBadges[name] = p.badge;
-      if (previousBadges[name] && previousBadges[name] !== p.badge) {
-        showBadgeCelebration(name, p.badge);
-      }
+    for (const [name,p] of Object.entries(newData.players||{})) {
+      if (previousBadges[name]&&previousBadges[name]!==p.badge) showBadgeCelebration(name,p.badge);
+      previousBadges[name] = p.badge;
     }
-    previousBadges = newBadges;
 
     empireData = newData;
 
-    // Map
-    const mapWrap = document.getElementById('map-wrap');
-    mapWrap.innerHTML = generateSVG(empireData);
-
-    // Click handler via delegation
+    document.getElementById('map-wrap').innerHTML = generateSVG(empireData);
     const svg = document.getElementById('empire-svg');
     if (svg) {
       svg.addEventListener('click', e => {
         const cell = e.target.closest('.hex-cell');
-        if (cell) openPanel(cell.dataset.player);
+        if (cell) openPlayerModal(cell.dataset.player);
       });
     }
 
-    // Leaderboard
     document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, currentTab);
 
-    // Stats strip
     const totalWars  = (empireData.wars||[]).filter(w=>w.status==='active').length;
-    const totalGems  = Object.values(empireData.players).reduce((s,p)=>s+p.vibe_gems,0);
-    const totalAcres = Object.values(empireData.players).reduce((s,p)=>s+p.acres,0);
-    document.getElementById('stats-strip').innerHTML =
-      `<span>👥 <b>${Object.keys(empireData.players).length}</b> warriors</span>
-       <span>⚔️ <b>${totalWars}</b> active wars</span>
-       <span>💎 <b>${totalGems}</b> total gems</span>
-       <span>🌿 <b>${totalAcres}</b> total acres</span>`;
+    const totalGems  = Object.values(empireData.players).reduce((s,p)=>s+(p.vibe_gems||0),0);
+    const totalAcres = Object.values(empireData.players).reduce((s,p)=>s+(p.acres||0),0);
+    const totalW     = Object.keys(empireData.players).length;
 
-    const ts = empireData.meta?.last_updated
-      ? new Date(empireData.meta.last_updated).toLocaleTimeString()
-      : 'unknown';
-    document.getElementById('last-updated').textContent = `updated ${ts}`;
+    animateCount(document.getElementById('gs-warriors'), totalW);
+    animateCount(document.getElementById('gs-gems'),     totalGems);
+    animateCount(document.getElementById('gs-acres'),    totalAcres);
+    animateCount(document.getElementById('gs-wars'),     totalWars);
 
   } catch (err) {
-    document.getElementById('map-wrap').innerHTML =
-      `<div class="error">Failed to load empire.json<br><small>${err.message}</small></div>`;
-    document.getElementById('last-updated').textContent = 'error';
+    document.getElementById('map-wrap').innerHTML = `<div class="error-msg">Failed to load empire.json<br><small>${err.message}</small></div>`;
     console.error(err);
   }
 }

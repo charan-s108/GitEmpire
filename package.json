@@ -7,8 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "validate": "gitagent validate . && gitagent validate agents/bhima && gitagent validate agents/karna && gitagent validate agents/drona && gitagent validate agents/ashwathama && gitagent validate agents/abhimanyu",
-    "validate:all": "for d in . agents/bhima agents/karna agents/drona agents/ashwathama agents/abhimanyu; do echo \"--- $d ---\" && gitagent validate $d; done",
+    "validate": "node scripts/validate.js",
     "dev": "gitclaw run --coordinator arjuna --recursive",
     "demo": "node scripts/demo.js"
   },

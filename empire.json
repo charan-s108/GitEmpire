@@ -1,11 +1,11 @@
 {
   "meta": {
     "version": "1.0.0",
-    "last_updated": "2026-04-17T06:00:28.004Z",
+    "last_updated": "2026-04-17T10:42:11.814Z",
     "total_warriors": 3,
     "leaderboard_resets": {
-      "weekly_reset": "2026-04-17T06:00:24.814Z",
-      "monthly_reset": "2026-04-17T06:00:24.814Z"
+      "weekly_reset": "2026-04-17T10:42:08.554Z",
+      "monthly_reset": "2026-04-17T10:42:08.554Z"
     }
   },
   "players": {
@@ -22,23 +22,23 @@
           "lines_changed": 210,
           "has_tests": true,
           "complexity_factor": 1,
-          "claimed": "2026-04-17T06:00:26.710Z"
+          "claimed": "2026-04-17T10:42:10.698Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-17T06:00:26.419Z",
-      "last_active": "2026-04-17T06:00:26.976Z",
+      "joined": "2026-04-17T10:42:10.495Z",
+      "last_active": "2026-04-17T10:42:10.950Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "veer",
       "badge_history": [
         {
           "badge": "sainik",
-          "earned_at": "2026-04-17T06:00:26.419Z"
+          "earned_at": "2026-04-17T10:42:10.496Z"
         },
         {
           "badge": "veer",
-          "earned_at": "2026-04-17T06:00:26.710Z"
+          "earned_at": "2026-04-17T10:42:10.698Z"
         }
       ],
       "bugs_found": 4,
@@ -47,7 +47,7 @@
       "quest_progress": {
         "first_blood": {
           "status": "completed",
-          "completed_at": "2026-04-17T06:00:26.419Z"
+          "completed_at": "2026-04-17T10:42:10.496Z"
         },
         "war_chest": {
           "status": "in_progress"
@@ -70,19 +70,19 @@
           "lines_changed": 100,
           "has_tests": false,
           "complexity_factor": 1,
-          "claimed": "2026-04-17T06:00:26.763Z"
+          "claimed": "2026-04-17T10:42:10.747Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-17T06:00:26.479Z",
-      "last_active": "2026-04-17T06:00:27.032Z",
+      "joined": "2026-04-17T10:42:10.545Z",
+      "last_active": "2026-04-17T10:42:11.031Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "sainik",
       "badge_history": [
         {
           "badge": "sainik",
-          "earned_at": "2026-04-17T06:00:26.479Z"
+          "earned_at": "2026-04-17T10:42:10.545Z"
         }
       ],
       "bugs_found": 0,
@@ -91,7 +91,7 @@
       "quest_progress": {
         "first_blood": {
           "status": "completed",
-          "completed_at": "2026-04-17T06:00:26.480Z"
+          "completed_at": "2026-04-17T10:42:10.545Z"
         }
       },
       "active_quests": []
@@ -109,19 +109,19 @@
           "lines_changed": 405,
           "has_tests": false,
           "complexity_factor": 0.5,
-          "claimed": "2026-04-17T06:00:26.816Z"
+          "claimed": "2026-04-17T10:42:10.797Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-17T06:00:26.572Z",
-      "last_active": "2026-04-17T06:00:28.001Z",
+      "joined": "2026-04-17T10:42:10.601Z",
+      "last_active": "2026-04-17T10:42:11.813Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "sainik",
       "badge_history": [
         {
           "badge": "sainik",
-          "earned_at": "2026-04-17T06:00:26.572Z"
+          "earned_at": "2026-04-17T10:42:10.601Z"
         }
       ],
       "bugs_found": 1,
@@ -130,11 +130,11 @@
       "quest_progress": {
         "first_blood": {
           "status": "completed",
-          "completed_at": "2026-04-17T06:00:26.573Z"
+          "completed_at": "2026-04-17T10:42:10.602Z"
         },
         "bug_scout": {
           "status": "completed",
-          "completed_at": "2026-04-17T06:00:28.004Z"
+          "completed_at": "2026-04-17T10:42:11.813Z"
         }
       },
       "active_quests": []
@@ -144,7 +144,7 @@
   "signals": {
     "pending_claims": [],
     "karna_scanning": false,
-    "last_svg_update": "2026-04-17T06:00:27.530Z"
+    "last_svg_update": "2026-04-17T10:42:11.422Z"
   },
   "leaderboard": [],
   "battle_svg": "empire-map.svg"

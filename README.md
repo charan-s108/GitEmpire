@@ -2,15 +2,16 @@
 
 # ⚔️ GitEmpire
 
-### *Five Mahabharata warriors. One codebase. Infinite dharma.*
+### *Six Mahabharata warriors. One guru. One codebase. Infinite dharma.*
 
 PRs become land. Bugs become bounties. Every commit echoes through the ages.
 
 <br/>
 
 [![gitagent spec](https://img.shields.io/badge/gitagent-v0.1.0%20compliant-00d4ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNE0yIDEybDggNCA4LTQiLz48L3N2Zz4=)](https://github.com/open-gitagent/gitagent)
+[![clawless](https://img.shields.io/badge/ClawLess-WebContainer%20compatible-ff6600?style=for-the-badge&logo=webassembly&logoColor=white)](https://github.com/open-gitagent/clawless)
 [![gitclaw](https://img.shields.io/badge/gitclaw-v1.3.3-00ff88?style=for-the-badge)](https://github.com/open-gitagent/gitclaw)
-[![validation](https://img.shields.io/badge/gitagent%20validate-6%2F6%20%E2%9C%93-00ff88?style=for-the-badge)](#validation)
+[![validation](https://img.shields.io/badge/gitagent%20validate-7%2F7%20%E2%9C%93-00ff88?style=for-the-badge)](#validation)
 [![license](https://img.shields.io/badge/license-MIT-ff0066?style=for-the-badge)](LICENSE)
 [![hackathon](https://img.shields.io/badge/GitAgent%20Hackathon-2026-ff6600?style=for-the-badge)](https://github.com/open-gitagent/gitagent)
 
@@ -50,69 +51,7 @@ PRs become land. Bugs become bounties. Every commit echoes through the ages.
 
 ## 🗺️ Architecture
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ARCHITECTURE DIAGRAM
-     Replace this block with your diagram once created.
-
-     Recommended tools:
-       • Excalidraw (https://excalidraw.com) — export as SVG, save to assets/architecture.svg
-       • draw.io / diagrams.net — export PNG, save to assets/architecture.png
-       Then replace the mermaid block below with: ![Architecture](assets/architecture.svg)
-       • Mermaid (renders natively in GitHub):
-
-     ```mermaid
-     graph TD
-         GH[GitHub Event] --> A[Arjuna · Commander]
-         A -->|/vibe-join| B[Bhima · Recruiter]
-         A -->|/vibe-scout| K[Karna · Bug Scout]
-         A -->|PR merged| D[Drona · Land Master]
-         A -->|/vibe-trade| AS[Ashwathama · Treasurer]
-         A -->|/vibe-map| AB[Abhimanyu · Strategist]
-         B --> E[(empire.json)]
-         K --> E
-         D --> E
-         AS --> E
-         AB --> E
-         E --> GH2[GitHub Comment]
-     ```
-
-     ════════════════════════════════════════════════════════════════════════ -->
-
-```mermaid
-graph TD
-    GH["🔔 GitHub Event<br/>(comment / PR merge)"]:::event --> A
-
-    subgraph Arjuna ["⚔️ Arjuna — Commander"]
-        A["route-command skill<br/>parses slash commands"]
-    end
-
-    A -->|"/vibe-join @user"| B
-    A -->|"/vibe-scout &lt;file&gt;"| K
-    A -->|"PR merged / /claim-vibe"| D
-    A -->|"/vibe-trade Ngems @user"| AS
-    A -->|"/vibe-map / /leaderboard"| AB
-
-    B["🌊 Bhima<br/>Recruiter · join.js"]:::warrior
-    K["⚡ Karna<br/>Bug Scout · scan.js"]:::warrior
-    D["✨ Drona<br/>Land Master · claim.js"]:::warrior
-    AS["🌙 Ashwathama<br/>Treasurer · trade.js"]:::warrior
-    AB["🌟 Abhimanyu<br/>Strategist · mapgen.js"]:::warrior
-
-    B --> E
-    K --> E
-    D --> E
-    AS --> E
-    AB --> E
-
-    E[("⚔️ empire.json<br/>shared atomic state")]:::state
-
-    E --> OUT["💬 GitHub Comment<br/>vibe aesthetic · neon SVG"]:::output
-
-    classDef event   fill:#ff6600,color:#000,stroke:none
-    classDef warrior fill:#1a2332,color:#e6edf3,stroke:#00d4ff,stroke-width:1px
-    classDef state   fill:#7700ff,color:#fff,stroke:#7700ff
-    classDef output  fill:#00ff88,color:#000,stroke:none
-```
+![Architecture](./assets/architecture.png)
 
 <br/>
 
@@ -177,6 +116,13 @@ graph TD
 <td><code>/vibe-map</code> · <code>/leaderboard</code></td>
 <td><em>"I entered the formation. I drew the map. I lit the neon grid."</em></td>
 </tr>
+<tr>
+<td><strong>Veda</strong> 📚</td>
+<td>Guru · Knowledge Validator</td>
+<td><code>dharma-guide</code></td>
+<td><code>/vibe-guide</code></td>
+<td><em>"Knowledge is the only territory that expands when shared."</em></td>
+</tr>
 </tbody>
 </table>
 
@@ -206,13 +152,18 @@ npm run validate
 ```
 
 ```
-✓ agent.yaml — valid        (arjuna)
-✓ agent.yaml — valid        (bhima)
-✓ agent.yaml — valid        (karna)
-✓ agent.yaml — valid        (drona)
-✓ agent.yaml — valid        (ashwathama)
-✓ agent.yaml — valid        (abhimanyu)
-6/6 ✓ Validation passed (0 warnings)
+⚔️  GitEmpire — Agent Validation
+────────────────────────────────────────────
+  ✓  arjuna    (root)      valid
+  ✓  bhima                 valid
+  ✓  karna                 valid
+  ✓  drona                 valid
+  ✓  ashwathama            valid
+  ✓  abhimanyu             valid
+  ✓  veda                  valid
+────────────────────────────────────────────
+
+  7/7 agents valid ✓ all clear
 ```
 
 ---
@@ -229,7 +180,7 @@ This single command runs **9 verification steps** in sequence:
 
 | Step | What it tests | Pass condition |
 |------|--------------|----------------|
-| 1 | `gitagent validate` on all 6 agents | 6/6 green, 0 warnings |
+| 1 | `gitagent validate` on all 7 agents | 7/7 green, 0 warnings |
 | 2 | Bhima registers 3 warriors + rejects duplicate | Duplicate skipped; badge assigned on join; `first_blood` quest auto-completed |
 | 3 | Drona claims 3 PRs with different complexity factors | Formula correct; `prs_merged` incremented; duplicate PR blocked |
 | 4 | Karna scans a file — rainbow ANSI to terminal | Findings reported; `bugs_found` incremented; badge recomputed |
@@ -355,6 +306,7 @@ The `GitEmpire Warriors` workflow triggers within seconds. Bhima posts a reply:
 | `/leaderboard monthly` | Abhimanyu posts this month's gem leaders |
 | `/vibe-quest list` | Abhimanyu shows your full quest log — status (✓/◌/—/🔒), reward, difficulty, next recommendation |
 | `/vibe-quest start <id>` | Bhima starts a quest (enforces badge tier requirement, max 3 active at once) |
+| `/vibe-guide` | Veda shows current state, next best step, one contextual hint, and quest/badge path recommendation |
 
 PR merged with tests? **Drona triggers automatically** — no command needed.
 
@@ -426,9 +378,8 @@ The empire map is more than a static image — it's a live, interactive dashboar
 | Feature | Details |
 |---------|---------|
 | Live map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
-| Clickable territories | Click any hex → side panel with full player stats, PR history, badge journey, quest log |
-| Contribution path strip | 6-step tier stepper above the map — highlights your current badge and path to Atirathi |
-| Quest panel | Player side panel shows all quest statuses (◌ Active / ✓ Done) |
+| Clickable territories | Click any hex → modal with full player stats, PR history, badge journey, badge progression track, quest log |
+| Quest panel | Player modal shows all quest statuses (◌ Active / ✓ Done / 🔒 Locked) |
 | Badge celebration toast | Slide-up toast fires bottom-right when a badge upgrade is detected on refresh |
 | Leaderboard tabs | Toggle between All-time / Monthly / Weekly with one click |
 | Auto-refresh | Fetches latest `empire.json` every 30 seconds — no page reload needed |
@@ -440,6 +391,51 @@ The empire map is more than a static image — it's a live, interactive dashboar
 - Every **Monday midnight UTC** — `weekly_gems` resets to 0
 - Every **1st of the month UTC** — `monthly_gems` resets to 0
 - Manual trigger: Actions → GitEmpire Warriors → Run workflow → `reset_scope: weekly` or `monthly`
+
+---
+
+## 🌐 ClawLess — Run in the Browser
+
+GitEmpire is fully compatible with [ClawLess](https://github.com/open-gitagent/clawless) — the serverless browser runtime for Claw Agents powered by WebContainers (WASM). Run all 7 warriors entirely in the browser with no server required.
+
+### Why it's compatible
+
+| Requirement | Status |
+|-------------|--------|
+| GitAgent v0.1.0 spec compliant | ✅ 7/7 agents pass `gitagent validate` |
+| Zero native Node.js addons | ✅ Pure JS only — `gitclaw`, `clawcontainer`, `@open-gitagent/gitagent` |
+| Dynamic file paths via `process.cwd()` | ✅ All scripts — no hardcoded absolute paths |
+| No `child_process` in agent scripts | ✅ Only in local `demo.js` (dev tool, not agent runtime) |
+| Node.js ≥ 18 | ✅ WebContainer runs Node.js 18 |
+| Model format — colon separator | ✅ All `agent.yaml` use `groq:llama-3.3-70b-versatile` |
+| `clawcontainer` in dependencies | ✅ `^1.1.0` in `package.json` |
+
+### Quick start (browser)
+
+```typescript
+import { ClawContainer } from 'clawcontainer';
+
+const cc = new ClawContainer('#app', {
+  template: 'gitclaw',
+  env: {
+    GROQ_API_KEY: 'gsk_...',           // from https://console.groq.com
+    GITHUB_TOKEN: 'ghp_...',           // for live GitHub comment posting
+    // CLAWLESS_MODEL: 'claude-sonnet-4-20250514'  // optional: override model
+  }
+});
+
+await cc.start();
+cc.on('ready', () => console.log('GitEmpire warriors ready!'));
+```
+
+### What works in ClawLess
+
+- ✅ All 7 warrior scripts (`join.js`, `scan.js`, `claim.js`, `trade.js`, `mapgen.js`, `quest-list.js`, `guide.js`)
+- ✅ `npm run validate` — spec validation in the browser
+- ✅ `npm run dev` — `gitclaw run --coordinator arjuna --recursive`
+- ✅ `empire.json` read/write via WebContainer virtual filesystem
+- ✅ HTTPS calls to GROQ API and GitHub API (intercepted by ClawLess network layer)
+- ⚠️ `npm run demo` — uses `child_process.execSync`, which requires WebContainer process support
 
 ---
 
@@ -521,16 +517,19 @@ GitEmpire is built on **GitAgent v0.1.0** — the git-native agent specification
 
 | Requirement | Status |
 |-------------|--------|
-| `agent.yaml` with `spec_version`, `name`, `version`, `description` | ✅ All 6 agents |
-| `SOUL.md` identity file per agent | ✅ All 6 agents |
-| `SKILL.md` with valid YAML frontmatter per skill | ✅ All 6 skills |
+| `agent.yaml` with `spec_version`, `name`, `version`, `description` | ✅ All 7 agents |
+| `SOUL.md` identity file per agent | ✅ All 7 agents |
+| `SKILL.md` with valid YAML frontmatter per skill | ✅ All 7 skills |
 | `agents:` as object keyed by agent name (not array) | ✅ Confirmed by AJV |
 | `skills:` as array of kebab-case strings | ✅ Confirmed by AJV |
-| `gitagent-hackathon-2026` tag in every `agent.yaml` | ✅ All 6 agents |
-| `gitagent validate` passes with 0 warnings | ✅ `npm run validate` |
-| ClawLess compatibility (pure Node.js, no native addons) | ✅ Zero native addons |
-| `RULES.md` + `DUTIES.md` per agent (SOD policy) | ✅ Root + all 5 warriors |
-| Single atomic `empire.json` write pattern | ✅ All scripts |
+| `gitagent-hackathon-2026` tag in every `agent.yaml` | ✅ All 7 agents |
+| `gitagent validate` passes with 0 warnings | ✅ `npm run validate` — 7/7 green |
+| ClawLess compatibility (pure Node.js, no native addons) | ✅ Zero native addons — WebContainer-safe |
+| ClawLess model format — colon separator in `agent.yaml` | ✅ All 7 agents use `groq:model-name` (gitclaw v1.3.3 runtime requirement) |
+| `clawcontainer` in `package.json` dependencies | ✅ `^1.1.0` |
+| No `child_process` in agent execution paths | ✅ Only in local `demo.js` dev tool |
+| `RULES.md` + `DUTIES.md` per agent (SOD policy) | ✅ Root + all 6 warriors |
+| Single atomic `empire.json` write pattern | ✅ All scripts — Veda is read-only (never writes) |
 
 ---
 
@@ -590,13 +589,19 @@ GitEmpire/
 │   │       ├── SKILL.md
 │   │       └── scripts/trade.js  ← transfer, overdraft guard, badge recompute both parties
 │   │
-│   └── abhimanyu/                ← Strategist
+│   ├── abhimanyu/                ← Strategist
+│   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
+│   │   └── skills/battle-svg/
+│   │       ├── SKILL.md
+│   │       └── scripts/
+│   │           ├── mapgen.js     ← neon hex SVG, badge icons, 3-mode leaderboard
+│   │           └── quest-list.js ← /vibe-quest list (read-only, full status table)
+│   └── veda/                     ← Guru of Beginners (read-only)
 │       ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
-│       └── skills/battle-svg/
+│       └── skills/dharma-guide/
 │           ├── SKILL.md
 │           └── scripts/
-│               ├── mapgen.js     ← neon hex SVG, badge icons, 3-mode leaderboard
-│               └── quest-list.js ← /vibe-quest list (read-only, full status table)
+│               └── guide.js      ← /vibe-guide (read-only: badge progress + next step + quest hint)
 │
 └── .github/
     └── workflows/
@@ -609,8 +614,8 @@ GitEmpire/
 
 | Command | What it does |
 |---------|-------------|
-| `npm run validate` | `gitagent validate` on all 6 agents |
-| `npm run demo` | Full 8-step local verification chain |
+| `npm run validate` | Validate all 7 agents — prints clean `7/7 agents valid ✓ all clear` |
+| `npm run demo` | Full 9-step local verification chain (warriors + quests + Veda) |
 | `npm run demo -- --reset` | Reset empire.json then run full demo |
 | `npm run dev` | `gitclaw run --coordinator arjuna --recursive` |
 
@@ -622,9 +627,10 @@ GitEmpire/
 |-------|--------|-----|
 | Agent spec | [GitAgent v0.1.0](https://github.com/open-gitagent/gitagent) | The hackathon target spec |
 | Runtime | [gitclaw v1.3.3](https://github.com/open-gitagent/gitclaw) | Git-native agent executor |
+| Browser runtime | [ClawLess / clawcontainer ^1.1.0](https://github.com/open-gitagent/clawless) | Serverless WebContainer sandbox — run agents in the browser |
 | CI/CD | GitHub Actions | Free, event-driven, native to git |
-| LLM | `groq/llama-3.3-70b-versatile` | Fast inference, generous free tier |
-| Language | Node.js 20 | Clawless-compatible, no native addons |
+| LLM | `groq:llama-3.3-70b-versatile` | Fast inference, generous free tier |
+| Language | Node.js ≥ 18 | Zero native addons — pure JS, WebContainer-safe |
 | State | `empire.json` | One file, atomic writes, git-tracked |
 | No Python · No databases · No paid infra beyond Groq |
 

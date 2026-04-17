@@ -104,7 +104,7 @@ async function main() {
 
   // ── Step 1: Spec validation ────────────────────────────────────────────────
   h2('Step 1 — Spec Validation (gitagent v0.1.0)');
-  for (const dir of ['.', 'agents/bhima', 'agents/karna', 'agents/drona', 'agents/ashwathama', 'agents/abhimanyu']) {
+  for (const dir of ['.', 'agents/bhima', 'agents/karna', 'agents/drona', 'agents/ashwathama', 'agents/abhimanyu', 'agents/veda']) {
     run(`gitagent validate ${dir}`, `gitagent validate ${dir}`);
   }
 
@@ -234,6 +234,33 @@ async function main() {
     console.log(`  ${name.padEnd(14)}${s('first_blood')} ${s('land_grab')} ${s('bug_scout')} ${s('war_chest')} ${active}`);
   }
 
+  // ── Step 6c: Veda guide ───────────────────────────────────────────────────
+  h2('Step 6c — Veda: Dharma Guidance');
+  const GUIDE = 'agents/veda/skills/dharma-guide/scripts/guide.js';
+
+  // Unregistered user — should get join recommendation
+  runScript('/vibe-guide unregistered player', GUIDE, '@nobody');
+
+  // Registered users — guidance adapts to their state
+  runScript('/vibe-guide @alice (veer, has PRs + bugs)', GUIDE, '@alice');
+  runScript('/vibe-guide @bob (sainik, no bugs yet)',    GUIDE, '@bob');
+  runScript('/vibe-guide @charan (sainik, has bug)',     GUIDE, '@charan');
+
+  sep();
+  ok('Veda guidance adapts to each player\'s state');
+  info('Veda is read-only — empire.json unchanged after all 4 guide calls');
+
+  // Verify empire.json was not written (last_updated should not have changed)
+  const e6c = readEmpire();
+  const e5bStr = JSON.stringify(e5b);
+  const e6cStr = JSON.stringify(e6c);
+  if (e5bStr === e6cStr) {
+    ok('empire.json unchanged — Veda read-only constraint verified');
+  } else {
+    fail('empire.json was modified by Veda — read-only constraint violated');
+    process.exit(1);
+  }
+
   // ── Step 7: SVG preview ───────────────────────────────────────────────────
   h2('Step 7 — SVG Preview');
   const svgFilePath = path.join(ROOT, 'empire-map.svg');
@@ -291,7 +318,7 @@ async function main() {
   // ── Final ─────────────────────────────────────────────────────────────────
   h1('All checks passed ✓');
   console.log(`  ${C.green}${C.bold}GitEmpire is working correctly.${C.reset}`);
-  console.log(`  ${C.dim}All 5 warriors smoke-tested · badges verified · quests verified · SVG rendered${C.reset}\n`);
+  console.log(`  ${C.dim}All 6 warriors + Veda smoke-tested · badges verified · quests verified · SVG rendered${C.reset}\n`);
   console.log(`  Next steps:`);
   console.log(`  ${C.cyan}1.${C.reset} Open empire-preview.html in your browser to see the neon map`);
   console.log(`  ${C.cyan}2.${C.reset} Open https://charan-s108.github.io/GitEmpire/ for the live dashboard`);

@@ -150,6 +150,17 @@ jobs:
           QUEST_ID=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/vibe-quest start )\S+')
           node agents/bhima/skills/vibe-join/scripts/quest-start.js "@${{ github.event.comment.user.login }}" "$QUEST_ID"
 
+      - name: Route — vibe-guide
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-guide')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          node agents/veda/skills/dharma-guide/scripts/guide.js "@${{ github.event.comment.user.login }}"
+
       # ── Auto-claim on PR merge ─────────────────────────────────────────────
       - name: Auto-claim merged PR
         if: |
