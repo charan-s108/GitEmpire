@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: arjuna
 version: 0.1.0
-description: Supreme Commander of GitEmpire — routes vibe commands to Mahabharata sub-agents
+description: Supreme Commander of GitEmpire - routes vibe commands to Mahabharata sub-agents
 author: charan-s108
 license: MIT
 model:

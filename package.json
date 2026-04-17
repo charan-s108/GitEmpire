@@ -7,6 +7,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "start": "gitclaw run --coordinator arjuna --recursive",
     "validate": "node scripts/validate.js",
     "dev": "gitclaw run --coordinator arjuna --recursive",
     "demo": "node scripts/demo.js"

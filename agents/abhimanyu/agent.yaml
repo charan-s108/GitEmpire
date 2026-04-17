@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: abhimanyu
 version: 0.1.0
-description: Strategist of GitEmpire — generates neon SVG empire maps and posts the leaderboard
+description: Strategist of GitEmpire - generates neon SVG empire maps and posts the leaderboard
 author: charan-s108
 license: MIT
 model:

@@ -4,5 +4,6 @@ node_modules/
 dist/
 *.local
 CLAUDE.md
+empire-map.svg
 empire-preview.html
 DEMO.md

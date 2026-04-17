@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: drona
 version: 0.1.0
-description: Land Master of GitEmpire — converts merged PR lines into glow-acres and updates territory plots
+description: Land Master of GitEmpire - converts merged PR lines into glow-acres and updates territory plots
 author: charan-s108
 license: MIT
 model:

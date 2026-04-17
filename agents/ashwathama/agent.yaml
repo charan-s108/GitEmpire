@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: ashwathama
 version: 0.1.0
-description: Treasurer of GitEmpire — guards the war chest, processes gem transfers between warriors
+description: Treasurer of GitEmpire - guards the war chest, processes gem transfers between warriors
 author: charan-s108
 license: MIT
 model:

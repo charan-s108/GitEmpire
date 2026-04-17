@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: karna
 version: 0.1.0
-description: Bug Scout of GitEmpire — scans code diffs for defects, awards gem bounties for findings
+description: Bug Scout of GitEmpire - scans code diffs for defects, awards gem bounties for findings
 author: charan-s108
 license: MIT
 model:

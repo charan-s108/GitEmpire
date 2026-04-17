@@ -1,7 +1,7 @@
 spec_version: "0.1.0"
 name: veda
 version: 0.1.0
-description: Guru of Beginners — guides warriors through their dharma path, explains badges and quests, recommends the next best step
+description: Guru of Beginners - guides warriors through their dharma path, explains badges and quests, recommends the next best step
 author: charan-s108
 license: MIT
 model:
