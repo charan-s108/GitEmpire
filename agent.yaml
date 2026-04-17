@@ -15,27 +15,27 @@ skills:
   - route-command
 agents:
   bhima:
-    description: Recruiter — registers warriors, awards starter vibe-gems
+    description: Recruiter - registers warriors, awards starter vibe-gems
     delegation:
       mode: explicit
   karna:
-    description: Bug Scout — scans code diffs, awards gem bounties
+    description: Bug Scout - scans code diffs, awards gem bounties
     delegation:
       mode: explicit
   drona:
-    description: Land Master — converts merged PRs into glow-acres
+    description: Land Master - converts merged PRs into glow-acres
     delegation:
       mode: explicit
   ashwathama:
-    description: Treasurer — processes gem transfers, guards war chest
+    description: Treasurer - processes gem transfers, guards war chest
     delegation:
       mode: explicit
   abhimanyu:
-    description: Strategist — generates neon SVG maps and leaderboards
+    description: Strategist - generates neon SVG maps and leaderboards
     delegation:
       mode: explicit
   veda:
-    description: Guru of Beginners — guides warriors, explains badges and quests, recommends next steps
+    description: Guru of Beginners - guides warriors, explains badges and quests, recommends next steps
     delegation:
       mode: explicit
 delegation:
