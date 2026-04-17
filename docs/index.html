@@ -258,6 +258,63 @@
       margin-bottom: 4px;
     }
 
+    /* ── Quest panel ── */
+    .quest-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border)44;
+      font-size: 0.78rem;
+    }
+    .quest-row:last-child { border-bottom: none; }
+    .quest-done  { color: var(--green); }
+    .quest-active { color: var(--accent); }
+    .quest-avail { color: var(--dim); }
+
+    /* ── Contribution path strip ── */
+    #path-strip {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      padding: 0 4px;
+    }
+    .path-tier-wrap { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
+    .path-tier {
+      text-align: center;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      min-width: 72px;
+      flex-shrink: 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .path-tier.past   { border-color: var(--green); }
+    .path-tier.active { border-color: var(--accent); background: #00d4ff11; }
+    .path-connector { width: 28px; height: 2px; background: var(--border); flex-shrink: 0; }
+    .path-connector.past { background: var(--green); }
+
+    /* ── Badge celebration toast ── */
+    .badge-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--grid);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 200;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      box-shadow: 0 0 24px #00d4ff44;
+      font-size: 0.82rem;
+      max-width: 260px;
+    }
+    .badge-toast.visible { transform: translateY(0); opacity: 1; }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -298,6 +355,12 @@
   </div>
 </header>
 
+<!-- Contribution path strip -->
+<div id="path-strip" style="display:none">
+  <div style="font-size:0.65rem;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">⚔️ Warrior Path</div>
+  <div class="path-tier-wrap" id="path-steps"></div>
+</div>
+
 <div class="grid">
   <!-- Map -->
   <div class="card">
@@ -332,6 +395,8 @@
   <div id="panel-prs"></div>
   <div class="panel-section" id="panel-badge-label" style="display:none">🏅 Badge Journey</div>
   <div id="panel-badges"></div>
+  <div class="panel-section" id="panel-quest-label" style="display:none">⚔️ Quest Progress</div>
+  <div id="panel-quests"></div>
 </div>
 
 <footer>
@@ -373,9 +438,24 @@ const COLORS = {
   dim:     '#8b949e',
 };
 
+// ── Quest metadata (client-side mirror) ──────────────────────────────────────
+const QUEST_META = {
+  first_blood:   { name: 'First Blood',      difficulty: 'Beginner' },
+  land_grab:     { name: 'Land Grab',         difficulty: 'Beginner' },
+  test_dharma:   { name: 'Test Dharma',       difficulty: 'Beginner' },
+  bug_scout:     { name: 'Bug Scout',         difficulty: 'Beginner' },
+  war_chest:     { name: 'War Chest',         difficulty: 'Intermediate' },
+  veer_surge:    { name: 'Veer Surge',        difficulty: 'Intermediate' },
+  karna_eye:     { name: "Karna's Eye",       difficulty: 'Advanced' },
+  atirathi_path: { name: "Atirathi's Path",   difficulty: 'Legendary' },
+};
+
+const BADGE_ORDER = ['shishya','sainik','veer','kshatriya','maharathi','atirathi'];
+
 // ── State ─────────────────────────────────────────────────────────────────────
-let empireData  = null;
-let currentTab  = 'alltime';
+let empireData     = null;
+let currentTab     = 'alltime';
+let previousBadges = {};  // { '@alice': 'sainik', ... } — for celebration detection
 
 // ── SVG generation ────────────────────────────────────────────────────────────
 function generateSVG(empire) {
@@ -537,6 +617,54 @@ function switchTab(tab, btn) {
   }
 }
 
+// ── Contribution path strip ──────────────────────────────────────────────────
+function renderPathStrip(highlightBadge) {
+  const strip = document.getElementById('path-strip');
+  const steps = document.getElementById('path-steps');
+  if (!strip || !steps) return;
+
+  const hlTier = (BADGE_META[highlightBadge] || BADGE_META.shishya).tier;
+
+  const html = BADGE_ORDER.map((key, i) => {
+    const m    = BADGE_META[key];
+    const past = m.tier < hlTier;
+    const active = key === highlightBadge;
+    const tierClass = past ? 'past' : active ? 'active' : '';
+    const labelColor = past ? 'var(--green)' : active ? 'var(--accent)' : 'var(--dim)';
+    const connector = i < BADGE_ORDER.length - 1
+      ? `<div class="path-connector${past || (active && i < hlTier) ? ' past' : ''}"></div>`
+      : '';
+    return `<div style="display:flex;align-items:center;flex-shrink:0">
+      <div class="path-tier ${tierClass}">
+        <div style="font-size:1rem">${m.emoji}</div>
+        <div style="font-size:0.62rem;color:${labelColor};font-weight:${active?'bold':'normal'}">${m.label}</div>
+        <div style="font-size:0.52rem;color:var(--dim)">${m.sanskrit}</div>
+      </div>${connector}</div>`;
+  }).join('');
+
+  steps.innerHTML = html;
+  strip.style.display = 'block';
+}
+
+// ── Badge celebration toast ───────────────────────────────────────────────────
+function showBadgeCelebration(playerName, newBadge) {
+  const m = BADGE_META[newBadge] || BADGE_META.shishya;
+  const toast = document.createElement('div');
+  toast.className = 'badge-toast';
+  toast.innerHTML = `<span style="font-size:1.6rem">${m.emoji}</span>
+    <div>
+      <div style="font-weight:bold;color:var(--accent)">${playerName}</div>
+      <div style="font-size:0.72rem;color:var(--green)">Promoted to ${m.label}!</div>
+      <div style="font-size:0.68rem;color:var(--dim)">${m.sanskrit}</div>
+    </div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { toast.classList.add('visible'); });
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 4500);
+}
+
 // ── Player panel ──────────────────────────────────────────────────────────────
 function openPanel(playerName) {
   if (!empireData) return;
@@ -602,6 +730,31 @@ function openPanel(playerName) {
     badgeWrap.innerHTML = '';
   }
 
+  // Quest progress
+  const questLabel2 = document.getElementById('panel-quest-label');
+  const questWrap   = document.getElementById('panel-quests');
+  const qp = p.quest_progress || {};
+  const questIds = Object.keys(qp);
+  if (questIds.length > 0) {
+    questLabel2.style.display = 'block';
+    questWrap.innerHTML = questIds.map(id => {
+      const q    = QUEST_META[id];
+      const done = qp[id]?.status === 'completed';
+      const cls  = done ? 'quest-done' : 'quest-active';
+      const icon = done ? '✓' : '◌';
+      return `<div class="quest-row">
+        <span class="${cls}">${icon} ${q ? q.name : id}</span>
+        <span style="color:var(--dim);font-size:0.7rem">${done ? 'done' : 'active'}</span>
+      </div>`;
+    }).join('');
+  } else {
+    questLabel2.style.display = 'none';
+    questWrap.innerHTML = '';
+  }
+
+  // Contribution path strip
+  renderPathStrip(p.badge || 'shishya');
+
   document.getElementById('overlay').classList.add('open');
   document.getElementById('player-panel').classList.add('open');
 }
@@ -619,7 +772,19 @@ async function load() {
   try {
     const res = await fetch(`${EMPIRE_URL}?_=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    empireData = await res.json();
+    const newData = await res.json();
+
+    // Badge celebration — detect upgrades vs previous load
+    const newBadges = {};
+    for (const [name, p] of Object.entries(newData.players || {})) {
+      newBadges[name] = p.badge;
+      if (previousBadges[name] && previousBadges[name] !== p.badge) {
+        showBadgeCelebration(name, p.badge);
+      }
+    }
+    previousBadges = newBadges;
+
+    empireData = newData;
 
     // Map
     const mapWrap = document.getElementById('map-wrap');

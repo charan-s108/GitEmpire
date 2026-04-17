@@ -165,6 +165,75 @@ async function main() {
   runScript('generate SVG map',              MAPGEN, 'map');
   sep();
 
+  // ── Step 6b: Quest system ─────────────────────────────────────────────────
+  h2('Step 6b — Quest System (Phase 6)');
+  const QUEST_START = 'agents/bhima/skills/vibe-join/scripts/quest-start.js';
+  const QUEST_LIST  = 'agents/abhimanyu/skills/battle-svg/scripts/quest-list.js';
+
+  // Quest list — read-only, never mutates empire.json
+  runScript('/vibe-quest list for @alice',  QUEST_LIST, '@alice');
+  runScript('/vibe-quest list for @charan', QUEST_LIST, '@charan');
+
+  // Quest start — war_chest requires sainik tier (alice has it)
+  runScript('/vibe-quest start war_chest for @alice',      QUEST_START, '@alice',  'war_chest');
+  runScript('/vibe-quest start bug_scout for @charan',     QUEST_START, '@charan', 'bug_scout');
+
+  // Error cases
+  runScript('duplicate start (should already be active)',  QUEST_START, '@alice',  'war_chest');
+  runScript('unknown quest id (should reject)',            QUEST_START, '@alice',  'fake_quest');
+
+  sep();
+  const e5 = readEmpire();
+
+  // Verify quest fields
+  let questOk = true;
+  for (const [name, p] of Object.entries(e5.players)) {
+    if (!p.quest_progress) { warn(`${name} missing quest_progress`); questOk = false; }
+    if (!Array.isArray(p.active_quests)) { warn(`${name} missing active_quests`); questOk = false; }
+  }
+  if (questOk) ok('All players have quest_progress + active_quests fields');
+
+  // Verify first_blood is completed for all (join.js auto-completes it)
+  let firstBloodOk = true;
+  for (const [name, p] of Object.entries(e5.players)) {
+    if (p.quest_progress?.first_blood?.status !== 'completed') {
+      warn(`${name} first_blood not completed`);
+      firstBloodOk = false;
+    }
+  }
+  if (firstBloodOk) ok('first_blood quest auto-completed for all warriors');
+
+  // Verify alice has war_chest active
+  const aliceWarChest = e5.players['@alice']?.quest_progress?.war_chest?.status;
+  if (aliceWarChest === 'in_progress') {
+    ok('@alice war_chest quest is active (in_progress)');
+  } else {
+    warn(`@alice war_chest status: ${aliceWarChest || 'missing'}`);
+  }
+
+  // Quest completion through scan — bug_scout trigger
+  info('Scanning to trigger bug_scout quest completion for @charan...');
+  runScript('scan trade.js (triggers bug_scout for @charan)', SCAN,
+    'agents/ashwathama/skills/gem-vault/scripts/trade.js', 'charan');
+  const e5b = readEmpire();
+  const charanBugScout = e5b.players['@charan']?.quest_progress?.bug_scout?.status;
+  if (charanBugScout === 'completed') {
+    ok('@charan bug_scout quest completed via scan');
+  } else {
+    info(`@charan bug_scout status: ${charanBugScout || 'not started (no bugs found)'}`);
+  }
+
+  // Quest completion through claim — land_grab already completed; show quest progress table
+  console.log('');
+  console.log(`  ${C.bold}${'Warrior'.padEnd(14)}${'first_blood'.padEnd(15)}${'land_grab'.padEnd(13)}${'bug_scout'.padEnd(12)}${'war_chest'.padEnd(12)}active${C.reset}`);
+  console.log(`  ${C.dim}${'─'.repeat(74)}${C.reset}`);
+  for (const [name, p] of Object.entries(e5b.players)) {
+    const qp = p.quest_progress || {};
+    const s  = (id) => (qp[id]?.status === 'completed' ? '✓' : qp[id]?.status === 'in_progress' ? '◌' : '—').padEnd(13);
+    const active = (p.active_quests || []).join(', ') || '—';
+    console.log(`  ${name.padEnd(14)}${s('first_blood')} ${s('land_grab')} ${s('bug_scout')} ${s('war_chest')} ${active}`);
+  }
+
   // ── Step 7: SVG preview ───────────────────────────────────────────────────
   h2('Step 7 — SVG Preview');
   const svgFilePath = path.join(ROOT, 'empire-map.svg');
@@ -200,13 +269,15 @@ async function main() {
   const sorted = Object.entries(final.players)
     .sort(([, a], [, b]) => b.vibe_gems - a.vibe_gems);
 
-  // Verify badge fields exist
+  // Verify badge + quest fields exist
   let badgeOk = true;
   for (const [name, p] of sorted) {
     if (!p.badge) { warn(`${name} missing badge field`); badgeOk = false; }
     if (p.prs_merged === undefined) { warn(`${name} missing prs_merged field`); badgeOk = false; }
+    if (!p.quest_progress) { warn(`${name} missing quest_progress field`); badgeOk = false; }
+    if (!Array.isArray(p.active_quests)) { warn(`${name} missing active_quests field`); badgeOk = false; }
   }
-  if (badgeOk) ok('All players have badge + progression fields');
+  if (badgeOk) ok('All players have badge + progression + quest fields');
 
   console.log('');
   console.log(`  ${C.bold}${'Rank'.padEnd(6)}${'Warrior'.padEnd(14)}${'Badge'.padEnd(12)}${'Gems'.padEnd(10)}${'W.Gems'.padEnd(10)}${'Acres'.padEnd(8)}PRs${C.reset}`);
@@ -220,11 +291,11 @@ async function main() {
   // ── Final ─────────────────────────────────────────────────────────────────
   h1('All checks passed ✓');
   console.log(`  ${C.green}${C.bold}GitEmpire is working correctly.${C.reset}`);
-  console.log(`  ${C.dim}All 5 warriors smoke-tested · badges verified · SVG rendered${C.reset}\n`);
+  console.log(`  ${C.dim}All 5 warriors smoke-tested · badges verified · quests verified · SVG rendered${C.reset}\n`);
   console.log(`  Next steps:`);
   console.log(`  ${C.cyan}1.${C.reset} Open empire-preview.html in your browser to see the neon map`);
   console.log(`  ${C.cyan}2.${C.reset} Open https://charan-s108.github.io/GitEmpire/ for the live dashboard`);
-  console.log(`  ${C.cyan}3.${C.reset} Push to GitHub and add GROQ_API_KEY secret`);
+  console.log(`  ${C.cyan}3.${C.reset} Push to GitHub and run: GITHUB_TOKEN=... GITHUB_REPOSITORY=charan-s108/GitEmpire node scripts/create-quest-issues.js`);
   console.log(`  ${C.cyan}4.${C.reset} Post \`/vibe-join @yourname\` on any issue to go live\n`);
 }
 

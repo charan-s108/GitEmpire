@@ -12,7 +12,8 @@
 const fs   = require('fs');
 const path = require('path');
 const https = require('https');
-const { applyBadge, formatBadge } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { applyBadge, formatBadge, buildBadgeLine } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { checkQuestCompletion, nextQuestHint } = require(path.join(process.cwd(), 'scripts', 'quests'));
 
 // ── empire.json helpers ───────────────────────────────────────────────────────
 
@@ -154,6 +155,12 @@ The vault does not deal in debt.
   applyBadge(empire.players[senderKey]);
   const targetUpgraded = applyBadge(empire.players[targetKey]);
 
+  // Quest completion check — recipient may hit war_chest threshold
+  const targetPlayer = empire.players[targetKey];
+  if (!targetPlayer.quest_progress) targetPlayer.quest_progress = {};
+  if (!targetPlayer.active_quests)  targetPlayer.active_quests  = [];
+  const completedQuests = checkQuestCompletion(targetPlayer, 'gem_total', { vibe_gems: targetPlayer.vibe_gems });
+
   writeEmpire(empire);
 
   // Leaderboard snapshot
@@ -162,16 +169,21 @@ The vault does not deal in debt.
   const [topName, topPlayer] = sorted[0];
   const empireStatus = `top warrior: ${topName} (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
-  const upgradeLine = targetUpgraded
-    ? `\n**Badge upgrade for @${targetArg}:** ${formatBadge(empire.players[targetKey].badge)} 🎉`
+  const targetBadgeLine = buildBadgeLine(empire.players[targetKey], targetUpgraded);
+  const questLines = completedQuests.length > 0
+    ? completedQuests.map(q => `**Quest completed (@${targetArg}):** ${q.name}${q.gem_reward > 0 ? ` (+${q.gem_reward} gems)` : ''} 🎯`).join('\n')
     : '';
+  const senderPlayer = empire.players[senderKey];
+  const nextQuest = `**Next Quest:** ${nextQuestHint(senderPlayer)}`;
 
   const comment = `## ⚔️ ASHWATHAMA | GEM TRANSFER COMPLETE
 
 **Transfer:** ${amount} vibe-gems
 **From:** @${senderArg} (was ${senderBefore} → now ${senderAfter} gems)
 **To:** @${targetArg} (was ${targetBefore} → now ${targetAfter} gems)
-**Ledger:** transaction recorded 🌙${upgradeLine}
+**Ledger:** transaction recorded 🌙
+${targetBadgeLine}
+${questLines ? questLines + '\n' : ''}${nextQuest}
 **Empire Status:** ${empireStatus}
 
 ---

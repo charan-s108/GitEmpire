@@ -125,6 +125,31 @@ jobs:
           fi
           node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard "$MODE"
 
+      - name: Route — vibe-quest list
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-quest') &&
+          contains(github.event.comment.body, 'list')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          node agents/abhimanyu/skills/battle-svg/scripts/quest-list.js "@${{ github.event.comment.user.login }}"
+
+      - name: Route — vibe-quest start
+        if: |
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '/vibe-quest') &&
+          contains(github.event.comment.body, 'start')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          QUEST_ID=$(echo "${{ github.event.comment.body }}" | grep -oP '(?<=/vibe-quest start )\S+')
+          node agents/bhima/skills/vibe-join/scripts/quest-start.js "@${{ github.event.comment.user.login }}" "$QUEST_ID"
+
       # ── Auto-claim on PR merge ─────────────────────────────────────────────
       - name: Auto-claim merged PR
         if: |

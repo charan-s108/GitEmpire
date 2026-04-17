@@ -14,7 +14,8 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { applyBadge, formatBadge, nextBadgeHint } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { applyBadge, formatBadge, nextBadgeHint, buildBadgeLine } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { checkQuestCompletion, nextQuestHint } = require(path.join(process.cwd(), 'scripts', 'quests'));
 
 // ── empire.json helpers ──────────────────────────────────────────────────────
 
@@ -121,12 +122,17 @@ async function main() {
     bugs_found: 0,
     critical_bugs_found: 0,
     prs_merged: 0,
+    quest_progress: {},
+    active_quests: ['first_blood'],
   };
   empire.meta.total_warriors += 1;
 
   // Compute initial badge (100 gems → sainik)
   const player = empire.players[`@${username}`];
-  applyBadge(player);
+  const upgraded = applyBadge(player);
+
+  // Auto-complete first_blood quest (triggers immediately on join)
+  checkQuestCompletion(player, 'join', {});
 
   writeEmpire(empire);
 
@@ -136,12 +142,17 @@ async function main() {
   const [topName, topPlayer] = sorted[0];
   const empireStatus = `${empire.meta.total_warriors} warriors strong · top warrior: ${topName} (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
+  const badgeLine  = buildBadgeLine(player, upgraded);
+  const questHint  = nextQuestHint(player);
+
   const comment = `## ⚔️ BHIMA | WARRIOR REGISTERED
 
 **Welcome:** @${username} has entered the empire 🌊
 **Starter gems:** 100 vibe-gems deposited to war chest
-**Badge earned:** ${formatBadge(player.badge)}
+**Quest completed:** First Blood ⚔️ — you have entered the empire
+${badgeLine}
 **${nextBadgeHint(player)}**
+**Next Quest:** ${questHint}
 **Empire Status:** ${empireStatus}
 
 ---

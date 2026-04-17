@@ -1,18 +1,18 @@
 {
   "meta": {
     "version": "1.0.0",
-    "last_updated": "2026-04-17T00:00:00.000Z",
+    "last_updated": "2026-04-17T06:00:28.004Z",
     "total_warriors": 3,
     "leaderboard_resets": {
-      "weekly_reset": "2026-04-17T00:00:00.000Z",
-      "monthly_reset": "2026-04-17T00:00:00.000Z"
+      "weekly_reset": "2026-04-17T06:00:24.814Z",
+      "monthly_reset": "2026-04-17T06:00:24.814Z"
     }
   },
   "players": {
     "@alice": {
-      "vibe_gems": 1030,
-      "weekly_gems": 0,
-      "monthly_gems": 0,
+      "vibe_gems": 1180,
+      "weekly_gems": 1230,
+      "monthly_gems": 1230,
       "acres": 4,
       "plots": [
         {
@@ -22,27 +22,45 @@
           "lines_changed": 210,
           "has_tests": true,
           "complexity_factor": 1,
-          "claimed": "2026-04-16T09:02:50.348Z"
+          "claimed": "2026-04-17T06:00:26.710Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-16T09:02:50.210Z",
-      "last_active": "2026-04-16T09:02:50.547Z",
+      "joined": "2026-04-17T06:00:26.419Z",
+      "last_active": "2026-04-17T06:00:26.976Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "veer",
       "badge_history": [
-        { "badge": "sainik", "earned_at": "2026-04-16T09:02:50.210Z" },
-        { "badge": "veer",   "earned_at": "2026-04-16T09:02:50.547Z" }
+        {
+          "badge": "sainik",
+          "earned_at": "2026-04-17T06:00:26.419Z"
+        },
+        {
+          "badge": "veer",
+          "earned_at": "2026-04-17T06:00:26.710Z"
+        }
       ],
-      "bugs_found": 0,
+      "bugs_found": 4,
       "critical_bugs_found": 0,
-      "prs_merged": 1
+      "prs_merged": 1,
+      "quest_progress": {
+        "first_blood": {
+          "status": "completed",
+          "completed_at": "2026-04-17T06:00:26.419Z"
+        },
+        "war_chest": {
+          "status": "in_progress"
+        }
+      },
+      "active_quests": [
+        "war_chest"
+      ]
     },
     "@bob": {
       "vibe_gems": 225,
-      "weekly_gems": 0,
-      "monthly_gems": 0,
+      "weekly_gems": 250,
+      "monthly_gems": 250,
       "acres": 2,
       "plots": [
         {
@@ -52,26 +70,36 @@
           "lines_changed": 100,
           "has_tests": false,
           "complexity_factor": 1,
-          "claimed": "2026-04-16T09:02:50.388Z"
+          "claimed": "2026-04-17T06:00:26.763Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-16T09:02:50.249Z",
-      "last_active": "2026-04-16T09:02:50.580Z",
+      "joined": "2026-04-17T06:00:26.479Z",
+      "last_active": "2026-04-17T06:00:27.032Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "sainik",
       "badge_history": [
-        { "badge": "sainik", "earned_at": "2026-04-16T09:02:50.249Z" }
+        {
+          "badge": "sainik",
+          "earned_at": "2026-04-17T06:00:26.479Z"
+        }
       ],
       "bugs_found": 0,
       "critical_bugs_found": 0,
-      "prs_merged": 1
+      "prs_merged": 1,
+      "quest_progress": {
+        "first_blood": {
+          "status": "completed",
+          "completed_at": "2026-04-17T06:00:26.480Z"
+        }
+      },
+      "active_quests": []
     },
     "@charan": {
-      "vibe_gems": 328,
-      "weekly_gems": 0,
-      "monthly_gems": 0,
+      "vibe_gems": 538,
+      "weekly_gems": 538,
+      "monthly_gems": 538,
       "acres": 8,
       "plots": [
         {
@@ -81,29 +109,43 @@
           "lines_changed": 405,
           "has_tests": false,
           "complexity_factor": 0.5,
-          "claimed": "2026-04-16T09:02:50.426Z"
+          "claimed": "2026-04-17T06:00:26.816Z"
         }
       ],
       "streak": 1,
-      "joined": "2026-04-16T09:02:50.284Z",
-      "last_active": "2026-04-16T09:02:50.581Z",
+      "joined": "2026-04-17T06:00:26.572Z",
+      "last_active": "2026-04-17T06:00:28.001Z",
       "wars_won": 0,
       "wars_lost": 0,
       "badge": "sainik",
       "badge_history": [
-        { "badge": "sainik", "earned_at": "2026-04-16T09:02:50.284Z" }
+        {
+          "badge": "sainik",
+          "earned_at": "2026-04-17T06:00:26.572Z"
+        }
       ],
-      "bugs_found": 0,
+      "bugs_found": 1,
       "critical_bugs_found": 0,
-      "prs_merged": 1
+      "prs_merged": 1,
+      "quest_progress": {
+        "first_blood": {
+          "status": "completed",
+          "completed_at": "2026-04-17T06:00:26.573Z"
+        },
+        "bug_scout": {
+          "status": "completed",
+          "completed_at": "2026-04-17T06:00:28.004Z"
+        }
+      },
+      "active_quests": []
     }
   },
   "wars": [],
   "signals": {
     "pending_claims": [],
     "karna_scanning": false,
-    "last_svg_update": null
+    "last_svg_update": "2026-04-17T06:00:27.530Z"
   },
   "leaderboard": [],
-  "battle_svg": ""
+  "battle_svg": "empire-map.svg"
 }

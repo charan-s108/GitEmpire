@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs>
+    <filter id="glow0" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow1" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow2" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="warGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes warPulse {
+        0%   { stroke-dashoffset: 0; opacity: 1; }
+        50%  { opacity: 0.6; }
+        100% { stroke-dashoffset: -24; opacity: 1; }
+      }
+      .war-border { animation: warPulse 1.4s linear infinite; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="#0d1117"/>
+
+  <!-- Grid -->
+  <line x1="0" y1="0" x2="800" y2="0" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="52" x2="800" y2="52" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="104" x2="800" y2="104" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="156" x2="800" y2="156" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="208" x2="800" y2="208" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="260" x2="800" y2="260" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="312" x2="800" y2="312" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="364" x2="800" y2="364" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="416" x2="800" y2="416" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="468" x2="800" y2="468" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="0" y1="0" x2="0" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="50" y1="0" x2="50" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="100" y1="0" x2="100" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="150" y1="0" x2="150" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="200" y1="0" x2="200" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="250" y1="0" x2="250" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="300" y1="0" x2="300" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="350" y1="0" x2="350" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="400" y1="0" x2="400" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="450" y1="0" x2="450" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="500" y1="0" x2="500" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="550" y1="0" x2="550" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="600" y1="0" x2="600" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="650" y1="0" x2="650" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="700" y1="0" x2="700" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+  <line x1="750" y1="0" x2="750" y2="520" stroke="#1a2332" stroke-width="0.5"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="800" height="44" fill="#1a2332"/>
+  <text x="16" y="28" font-family="monospace" font-size="16" font-weight="bold"
+    fill="#00d4ff">⚔️  GitEmpire</text>
+  <text x="784" y="28" text-anchor="end" font-family="monospace" font-size="11"
+    fill="#8b949e">3 warriors · 0 active wars</text>
+
+  <!-- Hex cells -->
+  
+    <!-- @alice -->
+    <g class="hex-cell" data-player="@alice">
+    <polygon points="166.0,120.0 133.0,177.2 67.0,177.2 34.0,120.0 67.0,62.8 133.0,62.8"
+      fill="#00ff8822"
+      stroke="#00ff88"
+      stroke-width="2"
+      filter="url(#glow0)"
+    />
+    
+    <text x="100" y="100" text-anchor="middle"
+      font-family="monospace" font-size="12" font-weight="bold"
+      fill="#00ff88">@alice</text>
+    <text x="100" y="114" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">🏹 veer</text>
+    <text x="100" y="128" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#e6edf3">💎 1180</text>
+    <text x="100" y="142" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">🌿 4 acres</text>
+    </g>
+
+    <!-- @charan -->
+    <g class="hex-cell" data-player="@charan">
+    <polygon points="288.5,180.6 255.5,237.8 189.5,237.8 156.5,180.6 189.5,123.5 255.5,123.5"
+      fill="#ff006622"
+      stroke="#ff0066"
+      stroke-width="2"
+      filter="url(#glow1)"
+    />
+    
+    <text x="222.5" y="160.6217782649107" text-anchor="middle"
+      font-family="monospace" font-size="12" font-weight="bold"
+      fill="#ff0066">@charan</text>
+    <text x="222.5" y="174.6217782649107" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">⚔️ sainik</text>
+    <text x="222.5" y="188.6217782649107" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#e6edf3">💎 328</text>
+    <text x="222.5" y="202.6217782649107" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">🌿 8 acres</text>
+    </g>
+
+    <!-- @bob -->
+    <g class="hex-cell" data-player="@bob">
+    <polygon points="411.0,120.0 378.0,177.2 312.0,177.2 279.0,120.0 312.0,62.8 378.0,62.8"
+      fill="#00d4ff22"
+      stroke="#00d4ff"
+      stroke-width="2"
+      filter="url(#glow2)"
+    />
+    
+    <text x="345" y="100" text-anchor="middle"
+      font-family="monospace" font-size="12" font-weight="bold"
+      fill="#00d4ff">@bob</text>
+    <text x="345" y="114" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">⚔️ sainik</text>
+    <text x="345" y="128" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#e6edf3">💎 225</text>
+    <text x="345" y="142" text-anchor="middle"
+      font-family="monospace" font-size="10"
+      fill="#8b949e">🌿 2 acres</text>
+    </g>
+  
+
+  <!-- Legend -->
+  <rect x="0" y="472" width="800" height="48" fill="#1a233288"/>
+  <rect x="16" y="482" width="10" height="10" fill="#00ff88" rx="2"/>
+    <text x="30" y="491" font-family="monospace" font-size="9"
+      fill="#8b949e">alice</text>
+    <rect x="136" y="482" width="10" height="10" fill="#ff0066" rx="2"/>
+    <text x="150" y="491" font-family="monospace" font-size="9"
+      fill="#8b949e">charan</text>
+    <rect x="256" y="482" width="10" height="10" fill="#00d4ff" rx="2"/>
+    <text x="270" y="491" font-family="monospace" font-size="9"
+      fill="#8b949e">bob</text>
+  
+  <text x="784" y="510" text-anchor="end" font-family="monospace"
+    font-size="9" fill="#8b949e">GitEmpire v1.0 · 🎵 synthwave</text>
+</svg>

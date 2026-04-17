@@ -12,7 +12,8 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { applyBadge, formatBadge } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { applyBadge, formatBadge, buildBadgeLine } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { checkQuestCompletion, nextQuestHint } = require(path.join(process.cwd(), 'scripts', 'quests'));
 
 // ── ANSI rainbow ──────────────────────────────────────────────────────────────
 
@@ -307,6 +308,7 @@ The dharma code is clean. No bounty awarded.
   // Update empire.json
   const empire = readEmpire();
   let upgraded = false;
+  let completedQuests = [];
   if (invoker && empire.players[`@${invoker}`]) {
     const p = empire.players[`@${invoker}`];
     p.vibe_gems     += totalGems;
@@ -318,6 +320,15 @@ The dharma code is clean. No bounty awarded.
     p.last_active    = new Date().toISOString();
     empire.signals.karna_scanning = false;
     upgraded = applyBadge(p);
+
+    // Quest completion checks
+    if (!p.quest_progress) p.quest_progress = {};
+    if (!p.active_quests)  p.active_quests  = [];
+    completedQuests = [
+      ...checkQuestCompletion(p, 'bug_found',    { findings: findings.length }),
+      ...(critCount > 0 ? checkQuestCompletion(p, 'critical_bug', { critical_bugs_found: p.critical_bugs_found }) : []),
+    ];
+
     writeEmpire(empire);
   } else {
     console.warn(`[karna] @${invoker} not registered — gems not awarded. Run /vibe-join first.`);
@@ -335,11 +346,11 @@ The dharma code is clean. No bounty awarded.
     : 'no warriors yet';
 
   const invokerPlayer = empire.players[`@${invoker}`];
-  const badgeLine = invokerPlayer
-    ? (upgraded
-        ? `**Badge upgrade:** ${formatBadge(invokerPlayer.badge)} 🎉`
-        : `**Badge:** ${formatBadge(invokerPlayer.badge)}`)
+  const badgeLine  = invokerPlayer ? buildBadgeLine(invokerPlayer, upgraded) : '';
+  const questLines = completedQuests.length > 0
+    ? completedQuests.map(q => `**Quest completed:** ${q.name}${q.gem_reward > 0 ? ` (+${q.gem_reward} gems)` : ''} 🎯`).join('\n')
     : '';
+  const nextQuest  = invokerPlayer ? `**Next Quest:** ${nextQuestHint(invokerPlayer)}` : '';
 
   const comment = `## ⚔️ KARNA | BUG SCAN COMPLETE
 
@@ -352,6 +363,7 @@ ${tableRows}
 
 **Bounty awarded:** ${totalGems} vibe-gems → @${invoker}
 ${badgeLine}
+${questLines ? questLines + '\n' : ''}${nextQuest}
 **Empire Status:** ${empireStatus}
 
 ---

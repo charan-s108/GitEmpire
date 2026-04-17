@@ -103,4 +103,24 @@ function nextBadgeHint(player) {
   return `Next: ${meta.emoji} ${meta.label} — earn ${gemsNeeded} more gems OR merge ${prsNeeded} more PRs`;
 }
 
-module.exports = { computeBadge, applyBadge, formatBadge, nextBadgeHint, BADGE_META };
+/**
+ * Builds the badge line for a warrior GitHub comment.
+ * When upgraded: returns a multi-line celebration block.
+ * When not upgraded: returns a single "**Badge:** ..." line.
+ */
+function buildBadgeLine(player, upgraded) {
+  if (!upgraded) return `**Badge:** ${formatBadge(player.badge)}`;
+
+  const m = BADGE_META[player.badge] || BADGE_META.shishya;
+  const RANK_FLAVOR = {
+    sainik:    'You have taken your first step as a warrior. The empire grows stronger.',
+    veer:      'Courage confirmed. The battlefield remembers the brave.',
+    kshatriya: 'You have earned nobility. Your code carries honor.',
+    maharathi: 'Great chariot warrior — you drive the formation forward.',
+    atirathi:  'MATCHLESS. You stand where no arrow can reach you. ⚡',
+  };
+  const flavor = RANK_FLAVOR[player.badge] || 'The empire recognizes your rise.';
+  return `**🎉 BADGE UPGRADE — ${m.emoji} ${m.label.toUpperCase()} (${m.sanskrit}) 🎉**\n> *${flavor}*\n> **Tier:** ${m.tier} of 5`;
+}
+
+module.exports = { computeBadge, applyBadge, formatBadge, nextBadgeHint, buildBadgeLine, BADGE_META };

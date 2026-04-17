@@ -33,8 +33,9 @@ PRs become land. Bugs become bounties. Every commit echoes through the ages.
 
      Embed options:
        • GitHub-hosted MP4:  <video src="assets/demo.mp4" controls width="100%"/>
-       • YouTube:            [![Demo](thumbnail.png)](https://youtu.be/YOUR_ID)
+       • YouTube:            [![Demo](assets/thumbnail.png)](https://youtu.be/YOUR_ID)
        • GIF (< 10 MB):      ![Demo](assets/demo.gif)
+       Drop your video file into assets/ — it's already in the repo.
      ════════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
@@ -54,8 +55,9 @@ PRs become land. Bugs become bounties. Every commit echoes through the ages.
      Replace this block with your diagram once created.
 
      Recommended tools:
-       • Excalidraw (https://excalidraw.com) — export as SVG, commit to assets/
-       • draw.io / diagrams.net
+       • Excalidraw (https://excalidraw.com) — export as SVG, save to assets/architecture.svg
+       • draw.io / diagrams.net — export PNG, save to assets/architecture.png
+       Then replace the mermaid block below with: ![Architecture](assets/architecture.svg)
        • Mermaid (renders natively in GitHub):
 
      ```mermaid
@@ -223,18 +225,19 @@ Run the full warrior chain on your machine before touching GitHub. No API key ne
 npm run demo
 ```
 
-This single command runs **8 verification steps** in sequence:
+This single command runs **9 verification steps** in sequence:
 
 | Step | What it tests | Pass condition |
 |------|--------------|----------------|
 | 1 | `gitagent validate` on all 6 agents | 6/6 green, 0 warnings |
-| 2 | Bhima registers 3 warriors + rejects duplicate | Duplicate skipped; badge assigned on join |
+| 2 | Bhima registers 3 warriors + rejects duplicate | Duplicate skipped; badge assigned on join; `first_blood` quest auto-completed |
 | 3 | Drona claims 3 PRs with different complexity factors | Formula correct; `prs_merged` incremented; duplicate PR blocked |
 | 4 | Karna scans a file — rainbow ANSI to terminal | Findings reported; `bugs_found` incremented; badge recomputed |
 | 5 | Ashwathama executes transfer + rejects overdraft + rejects self-transfer | Balances correct; weekly/monthly gems updated; both rejections clean |
 | 6 | Abhimanyu generates all 3 leaderboard modes + SVG map | alltime/weekly/monthly all print; `empire-map.svg` written to disk |
+| 6b | Quest system — start, list, completion via scan | `war_chest` active for alice; `bug_scout` completed for charan via scan; all players have `quest_progress` |
 | 7 | SVG preview HTML generated | `empire-preview.html` openable in browser |
-| 8 | Final state table printed with badges | Ranked correctly; all players have badge + prs_merged fields |
+| 8 | Final state table printed with badges + quest fields | Ranked correctly; all players have badge + prs_merged + quest_progress fields |
 
 **After `npm run demo` completes:**
 
@@ -269,6 +272,15 @@ node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js map
 node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard
 node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard weekly
 node agents/abhimanyu/skills/battle-svg/scripts/mapgen.js leaderboard monthly
+
+# Abhimanyu — quest log (read-only)
+node agents/abhimanyu/skills/battle-svg/scripts/quest-list.js "@yourname"
+
+# Bhima — start a quest
+node agents/bhima/skills/vibe-join/scripts/quest-start.js "@yourname" "bug_scout"
+
+# Setup quest issues on GitHub (one-shot, requires live token)
+GITHUB_TOKEN=... GITHUB_REPOSITORY=charan-s108/GitEmpire node scripts/create-quest-issues.js
 ```
 
 All scripts print the full GitHub comment they *would* post to stdout when `GITHUB_TOKEN` is not set — so you can review every output before going live.
@@ -333,14 +345,16 @@ The `GitEmpire Warriors` workflow triggers within seconds. Bhima posts a reply:
 
 | Post this comment | What happens |
 |-------------------|-------------|
-| `/vibe-join @user` | Bhima registers the warrior, awards 100 gems, shows badge + next-tier hint |
-| `/vibe-scout src/auth.js` | Karna scans the file, posts findings table, awards bounty gems, recomputes badge |
-| `/claim-vibe #42` | Drona calculates gems + acres for PR #42, increments prs_merged, recomputes badge |
-| `/vibe-trade 50gems @bob` | Ashwathama transfers 50 gems, recomputes badge for both parties |
+| `/vibe-join @user` | Bhima registers the warrior, awards 100 gems, shows badge + next-tier hint, auto-completes **First Blood** quest |
+| `/vibe-scout src/auth.js` | Karna scans the file, posts findings table, awards bounty gems, recomputes badge, checks quest completion |
+| `/claim-vibe #42` | Drona calculates gems + acres for PR #42, increments prs_merged, recomputes badge, checks quest completion |
+| `/vibe-trade 50gems @bob` | Ashwathama transfers 50 gems, recomputes badge for both parties, checks gem-total quests |
 | `/vibe-map` | Abhimanyu writes `empire-map.svg`, commits it, posts link to live dashboard |
 | `/leaderboard` | Abhimanyu posts all-time top-10 rankings table |
 | `/leaderboard weekly` | Abhimanyu posts this week's gem leaders |
 | `/leaderboard monthly` | Abhimanyu posts this month's gem leaders |
+| `/vibe-quest list` | Abhimanyu shows your full quest log — status (✓/◌/—/🔒), reward, difficulty, next recommendation |
+| `/vibe-quest start <id>` | Bhima starts a quest (enforces badge tier requirement, max 3 active at once) |
 
 PR merged with tests? **Drona triggers automatically** — no command needed.
 
@@ -359,10 +373,46 @@ Every warrior earns a **Mahabharata title** based on their contributions. Badges
 | 🔱 **Maharathi** | महारथी | 5000+ gems **or** 30 merged PRs | `quest:maharathi` — expert |
 | ⚡ **Atirathi** | अतिरथी | 10+ critical bugs found (Karna) | All — highest rank |
 
-Badges are computed automatically after every action (join, PR merge, bug scan, gem trade). Upgrades are announced in the warrior's GitHub comment:
+Badges are computed automatically after every action (join, PR merge, bug scan, gem trade). Upgrades are announced in the warrior's GitHub comment with a celebration block:
 
 ```
-**Badge upgrade:** 🏹 Veer (वीर) 🎉
+**🎉 BADGE UPGRADE — 🏹 VEER (वीर) 🎉**
+> *Courage confirmed. The empire sees your glow.*
+> **Tier:** 2 of 5
+```
+
+The live dashboard also fires a **celebration toast** (bottom-right slide-up) when it detects a badge change on the next 30-second refresh.
+
+---
+
+## ⚔️ Quest System
+
+Every warrior has a structured path through 8 quests — from joining to finding 10 critical bugs.
+
+| Quest | Trigger | Badge Required | Reward |
+|-------|---------|---------------|--------|
+| **First Blood** | Join the empire | Any | Auto-completes on `/vibe-join` |
+| **Land Grab** | Merge your first PR | Any | +50 gems |
+| **Test Dharma** | Merge a PR with test files | Any | +75 gems |
+| **Bug Scout** | Find a bug with `/vibe-scout` | Any | +60 gems |
+| **War Chest** | Accumulate 500 total gems | ⚔️ Sainik | +100 gems |
+| **Veer Surge** | Merge 5 total PRs | ⚔️ Sainik | +150 gems |
+| **Karna's Eye** | Find 1 CRITICAL severity bug | 🏹 Veer | +200 gems |
+| **Atirathi's Path** | Find 10 CRITICAL severity bugs | 🛡️ Kshatriya | +500 gems |
+
+Quest rules:
+- **Max 3 active at once** — choose wisely
+- **First Blood** auto-starts and auto-completes on join — no command needed
+- All others require `/vibe-quest start <id>`
+- Quest completion is **automatic** — triggered by the relevant warrior action
+- Badge-gated quests post a soft notice if your tier is too low (gems still awarded)
+
+```
+# See your quest log
+/vibe-quest list
+
+# Start a quest
+/vibe-quest start war_chest
 ```
 
 ---
@@ -376,7 +426,10 @@ The empire map is more than a static image — it's a live, interactive dashboar
 | Feature | Details |
 |---------|---------|
 | Live map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
-| Clickable territories | Click any hex → side panel with full player stats, PR history, badge journey |
+| Clickable territories | Click any hex → side panel with full player stats, PR history, badge journey, quest log |
+| Contribution path strip | 6-step tier stepper above the map — highlights your current badge and path to Atirathi |
+| Quest panel | Player side panel shows all quest statuses (◌ Active / ✓ Done) |
+| Badge celebration toast | Slide-up toast fires bottom-right when a badge upgrade is detected on refresh |
 | Leaderboard tabs | Toggle between All-time / Monthly / Weekly with one click |
 | Auto-refresh | Fetches latest `empire.json` every 30 seconds — no page reload needed |
 | Works offline | Everything renders client-side from one JSON file |
@@ -498,9 +551,13 @@ GitEmpire/
 ├── docs/
 │   └── index.html                ← GitHub Pages live dashboard (interactive map + leaderboard)
 │
+├── assets/                       ← demo video + architecture diagram (drop files here)
+│
 ├── scripts/
-│   ├── demo.js                   ← local verification: 8-step full chain
-│   ├── badge.js                  ← shared badge utility (computeBadge, applyBadge, formatBadge)
+│   ├── demo.js                   ← local verification: 9-step full chain (incl. quest system)
+│   ├── badge.js                  ← shared badge utility (computeBadge, applyBadge, buildBadgeLine)
+│   ├── quests.js                 ← 8-quest catalog, checkQuestCompletion(), nextQuestHint()
+│   ├── create-quest-issues.js    ← one-shot setup: 13 labels + 8 quest GitHub issues
 │   └── reset-leaderboard.js      ← weekly/monthly gem reset (called by cron workflow)
 │
 ├── skills/
@@ -511,7 +568,9 @@ GitEmpire/
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │   │   └── skills/vibe-join/
 │   │       ├── SKILL.md
-│   │       └── scripts/join.js   ← register player, badge on join, nextBadgeHint
+│   │       └── scripts/
+│   │           ├── join.js       ← register player, first_blood quest, badge on join
+│   │           └── quest-start.js ← /vibe-quest start <id> (tier gate, 3-quest cap)
 │   │
 │   ├── karna/                    ← Bug Scout
 │   │   ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
@@ -535,7 +594,9 @@ GitEmpire/
 │       ├── agent.yaml · SOUL.md · RULES.md · DUTIES.md
 │       └── skills/battle-svg/
 │           ├── SKILL.md
-│           └── scripts/mapgen.js ← neon hex SVG, badge icons, 3-mode leaderboard
+│           └── scripts/
+│               ├── mapgen.js     ← neon hex SVG, badge icons, 3-mode leaderboard
+│               └── quest-list.js ← /vibe-quest list (read-only, full status table)
 │
 └── .github/
     └── workflows/

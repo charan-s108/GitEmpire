@@ -15,7 +15,8 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { applyBadge, formatBadge, nextBadgeHint } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { applyBadge, formatBadge, nextBadgeHint, buildBadgeLine } = require(path.join(process.cwd(), 'scripts', 'badge'));
+const { checkQuestCompletion, nextQuestHint } = require(path.join(process.cwd(), 'scripts', 'quests'));
 
 // ── empire.json helpers ──────────────────────────────────────────────────────
 
@@ -68,6 +69,59 @@ function postComment(body) {
     req.write(payload);
     req.end();
   });
+}
+
+// ── Badge tier soft-gate helpers ─────────────────────────────────────────────
+
+const BADGE_ORDER = ['shishya', 'sainik', 'veer', 'kshatriya', 'maharathi', 'atirathi'];
+
+function httpsGet(options) {
+  return new Promise((resolve) => {
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.end();
+  });
+}
+
+async function fetchLinkedIssueLabels(prNumber) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo  = process.env.GITHUB_REPOSITORY;
+  if (!token || !repo) return [];
+
+  const [owner, repoName] = repo.split('/');
+  const baseHeaders = {
+    Authorization: `Bearer ${token}`,
+    'User-Agent': 'GitEmpire-Drona/1.0',
+    Accept: 'application/vnd.github+json',
+  };
+
+  // Fetch PR body to parse "closes #N" / "fixes #N" / "resolves #N"
+  const pr = await httpsGet({
+    hostname: 'api.github.com',
+    path: `/repos/${owner}/${repoName}/pulls/${prNumber}`,
+    method: 'GET',
+    headers: baseHeaders,
+  });
+  if (!pr || !pr.body) return [];
+
+  const match = pr.body.match(/(?:closes?|fixes?|resolves?)\s+#(\d+)/i);
+  if (!match) return [];
+
+  const issueNum = match[1];
+  const issue = await httpsGet({
+    hostname: 'api.github.com',
+    path: `/repos/${owner}/${repoName}/issues/${issueNum}`,
+    method: 'GET',
+    headers: baseHeaders,
+  });
+  if (!issue || !Array.isArray(issue.labels)) return [];
+  return issue.labels.map(l => l.name);
 }
 
 // ── formula ──────────────────────────────────────────────────────────────────
@@ -146,6 +200,36 @@ async function main() {
 
   const upgraded = applyBadge(player);
 
+  // ── Quest completion checks ───────────────────────────────────────────────
+  if (!player.quest_progress) player.quest_progress = {};
+  if (!player.active_quests)  player.active_quests  = [];
+
+  const completedQuests = [
+    ...checkQuestCompletion(player, 'pr_claimed',    { prs_merged: player.prs_merged }),
+    ...(hasTests ? checkQuestCompletion(player, 'pr_with_tests', { has_tests: true }) : []),
+    ...checkQuestCompletion(player, 'gem_total',     { vibe_gems: player.vibe_gems }),
+  ];
+
+  // ── Drona soft-gate: check linked issue labels ────────────────────────────
+  const linkedLabels = await fetchLinkedIssueLabels(prNumber);
+  const questLabel   = linkedLabels.find(l => l.startsWith('quest:'));
+  let tierNotice = '';
+  if (questLabel) {
+    const { QUESTS }  = require(path.join(process.cwd(), 'scripts', 'quests'));
+    const { BADGE_META } = require(path.join(process.cwd(), 'scripts', 'badge'));
+    const questId = questLabel.replace('quest:', '');
+    const quest   = QUESTS[questId];
+    if (quest) {
+      const authorTier   = BADGE_ORDER.indexOf(player.badge);
+      const requiredTier = quest.badge_tier_required;
+      if (authorTier < requiredTier) {
+        const reqKey  = BADGE_ORDER[requiredTier];
+        const reqMeta = BADGE_META[reqKey];
+        tierNotice = `> **Drona notices:** This PR closes a \`${questLabel}\` quest issue requiring ${reqMeta.emoji} ${reqMeta.label} (${reqMeta.sanskrit}). You are ${formatBadge(player.badge)} — gems still awarded, but consider completing lower-tier quests first. 🏹`;
+      }
+    }
+  }
+
   writeEmpire(empire);
 
   // Leaderboard snapshot
@@ -154,19 +238,22 @@ async function main() {
   const [topName, topPlayer] = sorted[0];
   const empireStatus = `${topName} leads (${topPlayer.vibe_gems} gems, ${topPlayer.acres} acres)`;
 
-  const testBadge = hasTests ? '✓' : '✗';
-  const badgeLine = upgraded
-    ? `**Badge upgrade:** ${formatBadge(player.badge)} 🎉`
-    : `**Badge:** ${formatBadge(player.badge)}`;
+  const testBadge   = hasTests ? '✓' : '✗';
+  const badgeLine   = buildBadgeLine(player, upgraded);
+  const questLines  = completedQuests.length > 0
+    ? completedQuests.map(q => `**Quest completed:** ${q.name}${q.gem_reward > 0 ? ` (+${q.gem_reward} gems)` : ''} 🎯`).join('\n')
+    : '';
+  const nextQuest   = `**Next Quest:** ${nextQuestHint(player)}`;
 
   const comment = `## ⚔️ DRONA | TERRITORY CLAIMED
 
 **Warrior:** @${author}
-**PR #${prNumber}:** +${linesAdded}/-${linesDeleted} lines · tests ${testBadge}
+${tierNotice ? tierNotice + '\n' : ''}**PR #${prNumber}:** +${linesAdded}/-${linesDeleted} lines · tests ${testBadge}
 **Formula:** ${linesChanged} × ${hasTests ? '3' : '1'} × ${complexityFactor} = **${gems} vibe-gems**
 **Acres claimed:** ${acres} glow-acres
 **Running total:** ${player.vibe_gems} gems · ${player.acres} acres
 ${badgeLine}
+${questLines ? questLines + '\n' : ''}${nextQuest}
 **Empire Status:** ${empireStatus}
 
 ---
