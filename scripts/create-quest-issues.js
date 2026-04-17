@@ -3,13 +3,17 @@
 
 /**
  * GitEmpire — Create Quest Issues
- * One-shot setup script: creates 8 GitHub issues with quest:* labels,
- * badge requirements, difficulty, rewards, and step-by-step hints.
+ * One-shot setup script: creates 8 GitHub issues with quest labels and
+ * badge requirement labels so contributors can filter quests by tier.
+ *
+ * Quest completion is FULLY AUTOMATIC — tracked in empire.json via
+ * slash commands (/vibe-join, /vibe-scout, /vibe-quest start, etc.).
+ * These issues are a reference board, not a completion mechanism.
  *
  * Usage:
  *   GITHUB_TOKEN=gsk_... GITHUB_REPOSITORY=owner/repo node scripts/create-quest-issues.js
  *
- * Run once per repo. Subsequent runs will create duplicate issues if not skipped manually.
+ * Run once per repo. No duplicate protection on issues — do not run twice.
  */
 
 const https = require('https');
@@ -45,21 +49,21 @@ function buildIssueBody(quest) {
   const reqKey  = BADGE_ORDER[quest.badge_tier_required];
   const reqMeta = BADGE_META[reqKey];
   const rewardText = quest.gem_reward > 0
-    ? `**${quest.gem_reward} vibe-gems**${quest.badge_tier_reward !== null ? ' + badge unlock' : ''}`
-    : 'Empire recognition (starter quest — 100 starter gems awarded on join)';
+    ? `**${quest.gem_reward} vibe-gems** (bonus on completion)`
+    : 'Empire recognition + **100 starter gems** awarded automatically on join';
 
   const steps = buildSteps(quest);
 
   return `## ⚔️ Quest: ${quest.name}
 
 **Difficulty:** ${quest.difficulty}
-**Badge Required:** ${reqMeta.emoji} ${reqMeta.label} (${reqMeta.sanskrit}) or higher
+**Badge Required to start:** ${reqMeta.emoji} ${reqMeta.label} (${reqMeta.sanskrit}) or higher
 **Reward:** ${rewardText}
 **Quest ID:** \`${quest.id}\`
 
 ---
 
-### Description
+### What This Quest Is
 
 ${quest.description}
 
@@ -71,45 +75,93 @@ ${quest.hint}
 
 ${steps}
 
-### Quest System
+### How the Quest System Works
 
-1. Start this quest: \`/vibe-quest start ${quest.id}\`
-2. Complete the required action (see steps above)
-3. The quest completes **automatically** — the relevant warrior posts confirmation
+- **Start a quest:** Post \`/vibe-quest start ${quest.id}\` as a comment on any issue
+- **Complete automatically:** The relevant warrior script detects your action and awards the bonus gems — no manual confirmation needed
+- **Check your progress:** Post \`/vibe-quest list\` to see all quest statuses, or open the live dashboard at https://charan-s108.github.io/GitEmpire/ (⚔️ Quests tab)
+- **Max 3 active quests** at once — complete one before starting another
 
-> If you open a PR that closes this issue (via "Closes #N" in the PR body),
-> Drona will check your badge tier and note any tier mismatch.
+> This issue is a reference board. Quest completion is tracked in \`empire.json\` via GitHub Actions — not by closing this issue.
 
 ---
 
-**Labels:** \`quest\` · \`quest:${quest.id}\` · \`${quest.difficulty.toLowerCase()}\`
-
-*Part of the [GitEmpire](https://github.com/charan-s108/GitEmpire) quest system — Phase 6*`;
+*Part of the [GitEmpire](https://github.com/charan-s108/GitEmpire) quest system · Powered by Mahabharata warriors as recursive AI agents*`;
 }
 
 function buildSteps(quest) {
-  const common = '1. Make sure you are registered: `/vibe-join @yourname` in any issue comment';
+  const register = '1. Register if you haven\'t yet: post `/vibe-join @yourname` in any issue comment';
   switch (quest.trigger) {
     case 'join':
-      return `${common}\n2. That's it — this quest completes automatically when you join`;
+      return `${register}\n2. That's it — **First Blood completes automatically the moment you join**`;
+
     case 'pr_claimed':
       if (quest.target === 1) {
-        return `${common}\n2. Create a branch and make any code change\n3. Open a Pull Request targeting \`main\`\n4. Merge the PR — Drona auto-claims it within ~30 seconds`;
+        return [
+          register,
+          '2. Start the quest: `/vibe-quest start land_grab`',
+          '3. Create a branch, make any code change, open a PR targeting `main`',
+          '4. Merge the PR — Drona auto-triggers within ~30 seconds and awards gems',
+          '5. Quest completion is posted as a comment on the PR',
+        ].join('\n');
       }
-      return `${common}\n2. Merge ${quest.target} PRs total (Drona auto-claims each one)\n3. The quest completes automatically when your \`prs_merged\` counter reaches ${quest.target}`;
+      return [
+        register,
+        `2. Start the quest: \`/vibe-quest start ${quest.id}\``,
+        `3. Merge PRs — Drona auto-claims every merged PR`,
+        `4. Quest completes automatically when your \`prs_merged\` counter reaches ${quest.target}`,
+      ].join('\n');
+
     case 'pr_with_tests':
-      return `${common}\n2. Create a branch with code changes\n3. Add at least one test file (\`.test.js\`, \`.spec.ts\`, or \`_test.\` pattern)\n4. Open and merge the PR — Drona detects test files automatically`;
+      return [
+        register,
+        '2. Start the quest: `/vibe-quest start test_dharma`',
+        '3. Create a branch with code changes',
+        '4. Add at least one test file (`.test.js`, `.spec.ts`, or `_test.` naming pattern)',
+        '5. Open and merge the PR — Drona detects test files automatically and completes the quest',
+      ].join('\n');
+
     case 'bug_found':
-      return `${common}\n2. Pick any JavaScript or Python file in the repo\n3. Post \`/vibe-scout path/to/file.js\` as a comment on any issue\n4. If Karna finds at least one bug, the quest completes`;
+      return [
+        register,
+        '2. Start the quest: `/vibe-quest start bug_scout`',
+        '3. Pick any JavaScript or Python file in the repo',
+        '4. Post `/vibe-scout path/to/file.js` as a comment on any issue',
+        '5. Karna scans it — if at least one bug is found, the quest completes and bonus gems are awarded',
+      ].join('\n');
+
     case 'gem_total':
-      return `${common}\n2. Earn vibe-gems through PRs, bug scans, and gem trades\n3. The quest completes automatically when your total reaches ${quest.target} gems`;
+      return [
+        register,
+        `2. Start the quest: \`/vibe-quest start ${quest.id}\``,
+        '3. Earn vibe-gems through any combination of:',
+        '   - Merging PRs (Drona awards based on lines changed × complexity × test bonus)',
+        '   - Bug scans with Karna (`/vibe-scout path/to/file.js`)',
+        '   - Receiving gem trades from other warriors (`/vibe-trade <N>gems @you`)',
+        `4. Quest completes automatically when your total reaches ${quest.target} gems`,
+      ].join('\n');
+
     case 'critical_bug':
       if (quest.target === 1) {
-        return `${common}\n2. Run \`/vibe-scout\` on files that use \`eval()\`, template literals in \`exec\`, or unhandled \`.then()\` chains\n3. If Karna finds a CRITICAL severity bug, the quest completes`;
+        return [
+          register,
+          '2. Start the quest: `/vibe-quest start karna_eye`',
+          '3. Scan files that are likely to contain CRITICAL bugs — good targets:',
+          '   - Files using `eval()` or `new Function()`',
+          '   - Files with template literals passed to `child_process.exec`',
+          '   - Files with `.then()` chains that have no `.catch()`',
+          '4. Post `/vibe-scout path/to/file.js` — if Karna finds a CRITICAL severity bug, the quest completes',
+        ].join('\n');
       }
-      return `${common}\n2. Accumulate ${quest.target} CRITICAL severity bug findings across any number of \`/vibe-scout\` runs\n3. The quest completes automatically at ${quest.target} critical bugs`;
+      return [
+        register,
+        `2. Start the quest: \`/vibe-quest start ${quest.id}\``,
+        `3. Run \`/vibe-scout\` on multiple files — each CRITICAL finding counts`,
+        `4. Quest completes automatically at ${quest.target} total CRITICAL severity bugs across any scans`,
+      ].join('\n');
+
     default:
-      return common;
+      return register;
   }
 }
 
@@ -140,7 +192,9 @@ async function ensureLabel(owner, repo, token, name, color, description) {
 // ── Create a single issue ─────────────────────────────────────────────────────
 
 async function createIssue(owner, repo, token, quest) {
-  const labels = ['quest', `quest:${quest.id}`, quest.difficulty.toLowerCase()];
+  const reqBadgeKey = BADGE_ORDER[quest.badge_tier_required];
+  // Labels: quest category + specific quest + badge tier required
+  const labels = ['quest', `quest:${quest.id}`, `badge:${reqBadgeKey}`];
   const body   = buildIssueBody(quest);
 
   const res = await httpsRequest({
@@ -184,10 +238,12 @@ async function main() {
   console.log(`\n⚔️  GitEmpire Quest Issue Creator`);
   console.log(`   Repository: ${repoFull}\n`);
 
-  // Create required labels first
+  // Create labels: quest category + per-quest + badge tier required
   console.log('Creating labels...');
   const labelDefs = [
-    { name: 'quest',         color: '7700ff', description: 'GitEmpire quest system' },
+    // Quest system
+    { name: 'quest',               color: '7700ff', description: 'GitEmpire quest system' },
+    // Per-quest labels
     { name: 'quest:first_blood',   color: '00ff88', description: 'Quest: First Blood' },
     { name: 'quest:land_grab',     color: '00ff88', description: 'Quest: Land Grab' },
     { name: 'quest:test_dharma',   color: '00ff88', description: 'Quest: Test Dharma' },
@@ -196,10 +252,11 @@ async function main() {
     { name: 'quest:veer_surge',    color: '00d4ff', description: 'Quest: Veer Surge' },
     { name: 'quest:karna_eye',     color: 'ffaa00', description: "Quest: Karna's Eye" },
     { name: 'quest:atirathi_path', color: 'ff0066', description: "Quest: Atirathi's Path" },
-    { name: 'beginner',     color: '00ff88', description: 'Beginner difficulty' },
-    { name: 'intermediate', color: '00d4ff', description: 'Intermediate difficulty' },
-    { name: 'advanced',     color: 'ffaa00', description: 'Advanced difficulty' },
-    { name: 'legendary',    color: 'ff0066', description: 'Legendary difficulty' },
+    // Badge tier required — contributors can filter issues by their current badge
+    { name: 'badge:shishya',   color: 'e8f5e9', description: 'Requires Shishya badge (any new warrior)' },
+    { name: 'badge:sainik',    color: '00d4ff', description: 'Requires Sainik badge (100+ gems or 1+ PR)' },
+    { name: 'badge:veer',      color: 'ffaa00', description: 'Requires Veer badge (500+ gems or 5+ PRs)' },
+    { name: 'badge:kshatriya', color: 'ff0066', description: 'Requires Kshatriya badge (1500+ gems or 15+ PRs)' },
   ];
 
   for (const label of labelDefs) {
@@ -213,15 +270,16 @@ async function main() {
   for (const quest of Object.values(QUESTS)) {
     const issueNum = await createIssue(owner, repo, token, quest);
     if (issueNum) created.push({ quest: quest.name, issue: issueNum });
-    await sleep(600); // stay well under GitHub's secondary rate limit
+    await sleep(600); // stay under GitHub secondary rate limit
   }
 
   console.log(`\n✓ Done — ${created.length}/${Object.keys(QUESTS).length} quest issues created`);
   console.log('\nNext steps:');
   console.log('  1. Pin the "First Blood" issue to your repo (Issues → ⋯ → Pin issue)');
-  console.log('  2. Add "war camp" label or milestone to group quest issues');
-  console.log('  3. Update README with a "Quests" section linking to the issue list');
-  console.log('  4. Contributors can now run `/vibe-quest start <id>` to begin\n');
+  console.log('  2. Share the live quest board with contributors:');
+  console.log('     https://charan-s108.github.io/GitEmpire/ → ⚔️ Quests tab');
+  console.log('  3. Contributors register with: /vibe-join @username (comment on any issue)');
+  console.log('  4. Contributors start quests with: /vibe-quest start <id> (e.g. land_grab)\n');
 }
 
 main().catch(err => {
