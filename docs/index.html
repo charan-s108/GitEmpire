@@ -458,6 +458,39 @@
 
     .error-msg { color: var(--danger); font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; padding: 20px; text-align: center; }
 
+    /* ── QUEST BOARD ── */
+    .qb-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 4px; padding: 8px 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s; animation: rowIn 0.3s ease both;
+    }
+    .qb-row:last-child { border-bottom: none; }
+    .qb-row:hover { background: rgba(255,255,255,0.02); }
+    .qb-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .qb-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .qb-name { font-weight: 600; font-size: 0.72rem; }
+    .qb-diff { font-size: 0.52rem; padding: 1px 6px; border-radius: 999px; font-weight: 700; flex-shrink: 0; }
+    .qb-diff.beginner     { background: rgba(0,255,136,0.08);  color: var(--green);  border: 1px solid rgba(0,255,136,0.18); }
+    .qb-diff.intermediate { background: rgba(255,170,0,0.08);  color: var(--yellow); border: 1px solid rgba(255,170,0,0.18); }
+    .qb-diff.advanced     { background: rgba(255,102,0,0.08);  color: var(--orange); border: 1px solid rgba(255,102,0,0.18); }
+    .qb-diff.legendary    { background: rgba(255,0,102,0.08);  color: var(--pink);   border: 1px solid rgba(255,0,102,0.18); }
+    .qb-meta { display: flex; align-items: center; gap: 7px; font-size: 0.6rem; color: var(--dim); }
+    .qb-req { color: var(--accent); font-weight: 600; }
+    .qb-desc { font-size: 0.6rem; color: var(--dim); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .qb-warriors { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+    .qb-chip {
+      font-size: 0.56rem; padding: 1px 7px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(5,14,36,0.9);
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .qb-chip:hover { border-color: rgba(0,212,255,0.32); color: var(--accent); }
+    .qb-chip.done   { border-color: rgba(0,255,136,0.22); color: var(--green);  background: rgba(0,255,136,0.05); }
+    .qb-chip.active { border-color: rgba(0,212,255,0.22); color: var(--accent); background: rgba(0,212,255,0.05); }
+    .qb-none { font-size: 0.6rem; color: rgba(139,148,158,0.5); font-style: italic; }
+    .qb-reward { font-size: 0.72rem; font-weight: 700; color: var(--yellow); white-space: nowrap; align-self: flex-start; padding-top: 2px; }
+    .qb-reward.free { color: var(--green); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 820px) {
       .shell { padding: 9px 11px 6px; gap: 8px; }
@@ -548,6 +581,7 @@
         <button class="tab-btn active" onclick="switchTab('alltime',this)">🏆 All-time</button>
         <button class="tab-btn" onclick="switchTab('monthly',this)">🗓 Monthly</button>
         <button class="tab-btn" onclick="switchTab('weekly',this)">📅 Weekly</button>
+        <button class="tab-btn" onclick="switchTab('quests',this)">⚔️ Quests</button>
       </div>
       <div id="leaderboard-wrap">
         <div class="loading-msg"><div class="loading-spinner"></div>Loading warriors…</div>
@@ -658,15 +692,63 @@ const BADGE_META = {
 const BADGE_ORDER = ['shishya','sainik','veer','kshatriya','maharathi','atirathi'];
 
 const QUEST_META = {
-  first_blood:   { name:'First Blood',   diff:'beginner' },
-  land_grab:     { name:'Land Grab',     diff:'beginner' },
-  test_dharma:   { name:'Test Dharma',   diff:'beginner' },
-  bug_scout:     { name:'Bug Scout',     diff:'beginner' },
-  war_chest:     { name:'War Chest',     diff:'intermediate' },
-  veer_surge:    { name:'Veer Surge',    diff:'intermediate' },
-  karna_eye:     { name:"Karna's Eye",   diff:'advanced' },
-  atirathi_path: { name:'Atirathi Path', diff:'legendary' },
+  first_blood:   { name:'First Blood',      diff:'beginner',     tier:0, reward:0,   desc:'Join the empire and ignite your war chest' },
+  land_grab:     { name:'Land Grab',        diff:'beginner',     tier:0, reward:50,  desc:'Merge your first PR and claim territory' },
+  test_dharma:   { name:'Test Dharma',      diff:'beginner',     tier:0, reward:75,  desc:'Merge a PR that includes test files' },
+  bug_scout:     { name:'Bug Scout',        diff:'beginner',     tier:0, reward:60,  desc:'Find at least one bug with /vibe-scout' },
+  war_chest:     { name:'War Chest',        diff:'intermediate', tier:1, reward:100, desc:'Accumulate 500 vibe-gems total' },
+  veer_surge:    { name:'Veer Surge',       diff:'intermediate', tier:1, reward:150, desc:'Merge 5 pull requests total' },
+  karna_eye:     { name:"Karna's Eye",      diff:'advanced',     tier:2, reward:200, desc:'Find a CRITICAL severity bug' },
+  atirathi_path: { name:"Atirathi's Path",  diff:'legendary',    tier:3, reward:500, desc:'Find 10 critical bugs — become matchless' },
 };
+
+const QUEST_ORDER = ['first_blood','land_grab','test_dharma','bug_scout','war_chest','veer_surge','karna_eye','atirathi_path'];
+const TIER_LABEL  = ['Any badge','⚔️ Sainik+','🏹 Veer+','🛡️ Kshatriya+','🔱 Maharathi+','⚡ Atirathi'];
+
+function renderQuestBoard(empire) {
+  const players = Object.entries(empire.players || {});
+  if (players.length === 0) return `<div class="loading-msg" style="height:120px">No warriors yet.<br><br><code>/vibe-join @you</code></div>`;
+
+  return QUEST_ORDER.map((id, idx) => {
+    const q = QUEST_META[id]; if (!q) return '';
+
+    const completedBy = [], activeBy = [];
+    for (const [name, p] of players) {
+      const prog = (p.quest_progress || {})[id];
+      if (prog?.status === 'completed') completedBy.push(name);
+      else if ((p.active_quests || []).includes(id)) activeBy.push(name);
+    }
+
+    const chips = [
+      ...completedBy.map(n => `<span class="qb-chip done" onclick="openPlayerModal('${n}')" title="Completed">${n.replace(/^@/,'')} ✓</span>`),
+      ...activeBy.map(n   => `<span class="qb-chip active" onclick="openPlayerModal('${n}')" title="In progress">${n.replace(/^@/,'')} ◌</span>`),
+    ].join('');
+
+    const rewardHtml = q.reward > 0
+      ? `<div class="qb-reward">+${q.reward}💎</div>`
+      : `<div class="qb-reward free">+100💎</div>`;
+
+    const total = players.length;
+    const doneCount = completedBy.length;
+
+    return `<div class="qb-row" style="animation-delay:${idx*0.045}s">
+      <div class="qb-left">
+        <div class="qb-title">
+          <span class="qb-name">${q.name}</span>
+          <span class="qb-diff ${q.diff}">${q.diff}</span>
+        </div>
+        <div class="qb-meta">
+          <span class="qb-req">${TIER_LABEL[q.tier]}</span>
+          <span>·</span>
+          <span>${doneCount}${total > 0 ? '/'+total : ''} done</span>
+        </div>
+        <div class="qb-desc">${q.desc}</div>
+        <div class="qb-warriors">${chips || '<span class="qb-none">no one yet</span>'}</div>
+      </div>
+      ${rewardHtml}
+    </div>`;
+  }).join('');
+}
 
 const NEON = ['#00ff88','#ff0066','#00d4ff','#ffaa00','#cc44ff','#ff4444','#44ffcc','#ff8800'];
 
@@ -789,7 +871,9 @@ function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (empireData) document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, tab);
+  if (!empireData) return;
+  document.getElementById('leaderboard-wrap').innerHTML =
+    tab === 'quests' ? renderQuestBoard(empireData) : renderLeaderboard(empireData, tab);
 }
 
 function showBadgeCelebration(playerName, newBadge) {
@@ -905,7 +989,8 @@ async function load() {
       });
     }
 
-    document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, currentTab);
+    document.getElementById('leaderboard-wrap').innerHTML =
+      currentTab === 'quests' ? renderQuestBoard(empireData) : renderLeaderboard(empireData, currentTab);
 
     const totalWars  = (empireData.wars||[]).filter(w=>w.status==='active').length;
     const totalGems  = Object.values(empireData.players).reduce((s,p)=>s+(p.vibe_gems||0),0);
