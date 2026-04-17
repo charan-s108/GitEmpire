@@ -379,9 +379,9 @@ The empire map is more than a static image — it's a live, interactive dashboar
 |---------|---------|
 | Live map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
 | Clickable territories | Click any hex → modal with full player stats, PR history, badge journey, badge progression track, quest log |
-| Quest panel | Player modal shows all quest statuses (◌ Active / ✓ Done / 🔒 Locked) |
+| Quest board tab | ⚔️ Quests tab shows all 8 quests: badge required, gem reward, description, and clickable warrior chips (✓ done / ◌ active) |
 | Badge celebration toast | Slide-up toast fires bottom-right when a badge upgrade is detected on refresh |
-| Leaderboard tabs | Toggle between All-time / Monthly / Weekly with one click |
+| Leaderboard tabs | Toggle between All-time / Monthly / Weekly / Quests with one click |
 | Auto-refresh | Fetches latest `empire.json` every 30 seconds — no page reload needed |
 | Works offline | Everything renders client-side from one JSON file |
 
@@ -544,7 +544,7 @@ GitEmpire/
 ├── AGENTS.md                     ← Fallback reference for non-gitagent tools
 ├── empire.json                   ← Shared atomic state (players, badges, gems, wars)
 ├── empire-map.svg                ← Committed neon map (updated by /vibe-map)
-├── package.json                  ← scripts: validate, dev, demo
+├── package.json                  ← scripts: start, validate, dev, demo
 ├── .env.example
 │
 ├── docs/
@@ -614,10 +614,11 @@ GitEmpire/
 
 | Command | What it does |
 |---------|-------------|
+| `npm start` | `gitclaw run --coordinator arjuna --recursive` (used by ClawLess / play.clawless.io) |
 | `npm run validate` | Validate all 7 agents — prints clean `7/7 agents valid ✓ all clear` |
 | `npm run demo` | Full 9-step local verification chain (warriors + quests + Veda) |
 | `npm run demo -- --reset` | Reset empire.json then run full demo |
-| `npm run dev` | `gitclaw run --coordinator arjuna --recursive` |
+| `npm run dev` | Same as `npm start` — gitclaw interactive mode |
 
 ---
 
