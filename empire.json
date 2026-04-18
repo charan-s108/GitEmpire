@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "1.0.0",
-    "last_updated": "2026-04-18T03:04:36.741Z",
+    "last_updated": "2026-04-18T03:07:05.902Z",
     "total_warriors": 4,
     "leaderboard_resets": {
       "weekly_reset": "2026-04-17T10:42:08.554Z",
@@ -164,9 +164,14 @@
         "first_blood": {
           "status": "completed",
           "completed_at": "2026-04-18T03:04:36.741Z"
+        },
+        "land_grab": {
+          "status": "in_progress"
         }
       },
-      "active_quests": []
+      "active_quests": [
+        "land_grab"
+      ]
     }
   },
   "wars": [],
