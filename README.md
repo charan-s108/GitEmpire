@@ -337,53 +337,63 @@ The live dashboard also fires a **celebration toast** (bottom-right slide-up) wh
 
 ---
 
-## ⚔️ Quest System
+## 📚 Git Learning Dashboard (⚔️ Quests Tab)
 
-Every warrior has a structured path through 8 quests — from joining to finding 10 critical bugs.
+The **⚔️ Quests tab** in the live dashboard is a standalone game-based Git learning system — completely separate from the warrior contribution game.
 
-| Quest | Trigger | Badge Required | Reward |
-|-------|---------|---------------|--------|
-| **First Blood** | Join the empire | Any | Auto-completes on `/vibe-join` |
-| **Land Grab** | Merge your first PR | Any | +50 gems |
-| **Test Dharma** | Merge a PR with test files | Any | +75 gems |
-| **Bug Scout** | Find a bug with `/vibe-scout` | Any | +60 gems |
-| **War Chest** | Accumulate 500 total gems | ⚔️ Sainik | +100 gems |
-| **Veer Surge** | Merge 5 total PRs | ⚔️ Sainik | +150 gems |
-| **Karna's Eye** | Find 1 CRITICAL severity bug | 🏹 Veer | +200 gems |
-| **Atirathi's Path** | Find 10 CRITICAL severity bugs | 🛡️ Kshatriya | +500 gems |
+**6 levels × 5 quests = 30 challenges, progressing from `git init` to `git filter-repo`.**
 
-Quest rules:
-- **Max 3 active at once** — choose wisely
-- **First Blood** auto-starts and auto-completes on join — no command needed
-- All others require `/vibe-quest start <id>`
-- Quest completion is **automatic** — triggered by the relevant warrior action
-- Badge-gated quests post a soft notice if your tier is too low (gems still awarded)
+| Level | Badge Earned | Topic |
+|-------|-------------|-------|
+| Level 1 | 📖 Shishya | Git Foundations — init, add, commit, status, log |
+| Level 2 | ⚔️ Sainik | Branching & Remotes — branch, checkout, push, pull, clone |
+| Level 3 | 🏹 Veer | Merging & Collaboration — merge, conflicts, stash |
+| Level 4 | 🛡️ Kshatriya | Advanced Git — rebase, cherry-pick, reset, reflog |
+| Level 5 | 🔱 Maharathi | Git Internals — objects, tag, bisect, interactive rebase |
+| Level 6 | ⚡ Atirathi | Expert Patterns — submodules, worktrees, hooks, signed commits |
 
-```
-# See your quest log
-/vibe-quest list
+**Quest types:**
+- **Multiple choice** — pick the correct answer, explanation shown on submit
+- **Simulated terminal** — type the git command at the `$` prompt, validated instantly
 
-# Start a quest
-/vibe-quest start war_chest
-```
+**Progression:** Each level is locked until the previous level's badge is earned. Completing all 5 quests in a level awards the badge and fires the celebration toast. Progress persists in `localStorage` — no account needed.
+
+---
+
+## ⚔️ Warrior Contribution Tracking (GitHub Actions)
+
+Separate from the learning system — this tracks real contributions via slash commands in issue comments.
+
+| Slash command | What happens |
+|---------------|-------------|
+| `/vibe-join @user` | Bhima registers the warrior, awards 100 gems, shows badge + next-tier hint |
+| `/vibe-scout src/auth.js` | Karna scans the file, posts findings table, awards bounty gems, recomputes badge |
+| `/claim-vibe #42` | Drona calculates gems + acres for PR #42, increments prs_merged, recomputes badge |
+| `/vibe-trade 50gems @bob` | Ashwathama transfers 50 gems, recomputes badge for both parties |
+| `/vibe-map` | Abhimanyu writes `empire-map.svg`, commits it, posts link to live dashboard |
+| `/leaderboard` | Abhimanyu posts all-time top-10 rankings table |
+| `/leaderboard weekly` | Abhimanyu posts this week's gem leaders |
+| `/leaderboard monthly` | Abhimanyu posts this month's gem leaders |
+| `/vibe-quest list` | Abhimanyu shows warrior contribution quest log (8 contribution milestones) |
+| `/vibe-quest start <id>` | Bhima starts a contribution quest (badge tier gate, max 3 active) |
+| `/vibe-guide` | Veda shows current badge state, next best action, and one contextual hint |
+
+PR merged with tests? **Drona triggers automatically** — no command needed.
 
 ---
 
 ## 🗺️ Live Empire Dashboard
 
-The empire map is more than a static image — it's a live, interactive dashboard served via **GitHub Pages**.
-
 **URL:** `https://charan-s108.github.io/GitEmpire/`
 
 | Feature | Details |
 |---------|---------|
-| Live map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
-| Clickable territories | Click any hex → modal with full player stats, PR history, badge journey, badge progression track, quest log |
-| Quest board tab | ⚔️ Quests tab shows all 8 quests: badge required, gem reward, description, and clickable warrior chips (✓ done / ◌ active) |
-| Badge celebration toast | Slide-up toast fires bottom-right when a badge upgrade is detected on refresh |
-| Leaderboard tabs | Toggle between All-time / Monthly / Weekly / Quests with one click |
+| Live hex map | Neon hex grid with badge icons, gem counts, glow filters, war animations |
+| Clickable hex cells | Click any territory → modal with full player stats, PR history, badge journey |
+| **⚔️ Quests tab** | 6-level Git learning system — MCQ + simulated terminal, localStorage progress |
+| Leaderboard tabs | All-time / Monthly / Weekly rankings — one-click switch |
+| Badge celebration toast | Slide-up toast fires when a badge upgrade is detected on 30-second refresh |
 | Auto-refresh | Fetches latest `empire.json` every 30 seconds — no page reload needed |
-| Works offline | Everything renders client-side from one JSON file |
 
 **Setup:** Repo Settings → Pages → Source: `main` branch, `/docs` folder.
 

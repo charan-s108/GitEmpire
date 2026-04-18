@@ -458,38 +458,112 @@
 
     .error-msg { color: var(--danger); font-size: 0.78rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; padding: 20px; text-align: center; }
 
-    /* ── QUEST BOARD ── */
-    .qb-row {
-      display: grid; grid-template-columns: 1fr auto;
-      gap: 4px; padding: 8px 5px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.15s; animation: rowIn 0.3s ease both;
+    /* ── GIT LEARNING PATH ── */
+    .lp-wrap { display: flex; flex-direction: column; gap: 5px; padding: 2px 0; }
+    .lp-level {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 10px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.07);
+      cursor: pointer; transition: all 0.15s; animation: rowIn 0.3s ease both;
     }
-    .qb-row:last-child { border-bottom: none; }
-    .qb-row:hover { background: rgba(255,255,255,0.02); }
-    .qb-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .qb-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .qb-name { font-weight: 600; font-size: 0.72rem; }
-    .qb-diff { font-size: 0.52rem; padding: 1px 6px; border-radius: 999px; font-weight: 700; flex-shrink: 0; }
-    .qb-diff.beginner     { background: rgba(0,255,136,0.08);  color: var(--green);  border: 1px solid rgba(0,255,136,0.18); }
-    .qb-diff.intermediate { background: rgba(255,170,0,0.08);  color: var(--yellow); border: 1px solid rgba(255,170,0,0.18); }
-    .qb-diff.advanced     { background: rgba(255,102,0,0.08);  color: var(--orange); border: 1px solid rgba(255,102,0,0.18); }
-    .qb-diff.legendary    { background: rgba(255,0,102,0.08);  color: var(--pink);   border: 1px solid rgba(255,0,102,0.18); }
-    .qb-meta { display: flex; align-items: center; gap: 7px; font-size: 0.6rem; color: var(--dim); }
-    .qb-req { color: var(--accent); font-weight: 600; }
-    .qb-desc { font-size: 0.6rem; color: var(--dim); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .qb-warriors { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
-    .qb-chip {
-      font-size: 0.56rem; padding: 1px 7px; border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.07); background: rgba(5,14,36,0.9);
-      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    .lp-level:hover:not(.locked) { border-color: rgba(0,212,255,0.28); background: rgba(0,212,255,0.04); }
+    .lp-level.locked  { opacity: 0.38; cursor: default; }
+    .lp-level.complete { border-color: rgba(0,255,136,0.22); background: rgba(0,255,136,0.03); }
+    .lp-level.active  { border-color: rgba(0,212,255,0.18); }
+    .lp-level-left { display: flex; align-items: center; gap: 9px; }
+    .lp-badge-wrap { position: relative; flex-shrink: 0; width: 28px; text-align: center; }
+    .lp-badge-emoji { font-size: 1.35rem; line-height: 1; }
+    .lp-badge-tick {
+      position: absolute; bottom: -3px; right: -5px;
+      font-size: 0.48rem; background: var(--green); color: #000;
+      border-radius: 50%; width: 11px; height: 11px;
+      display: flex; align-items: center; justify-content: center; font-weight: 900;
     }
-    .qb-chip:hover { border-color: rgba(0,212,255,0.32); color: var(--accent); }
-    .qb-chip.done   { border-color: rgba(0,255,136,0.22); color: var(--green);  background: rgba(0,255,136,0.05); }
-    .qb-chip.active { border-color: rgba(0,212,255,0.22); color: var(--accent); background: rgba(0,212,255,0.05); }
-    .qb-none { font-size: 0.6rem; color: rgba(139,148,158,0.5); font-style: italic; }
-    .qb-reward { font-size: 0.72rem; font-weight: 700; color: var(--yellow); white-space: nowrap; align-self: flex-start; padding-top: 2px; }
-    .qb-reward.free { color: var(--green); }
+    .lp-level-info { display: flex; flex-direction: column; gap: 2px; }
+    .lp-level-title { font-size: 0.7rem; font-weight: 700; }
+    .lp-level-desc  { font-size: 0.57rem; color: var(--dim); line-height: 1.3; }
+    .lp-level-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .lp-locked-icon { font-size: 0.9rem; opacity: 0.45; }
+    .lp-prog-wrap   { display: flex; align-items: center; gap: 6px; }
+    .lp-prog-bar    { width: 56px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .lp-prog-fill   { height: 100%; background: var(--green); border-radius: 999px; transition: width 0.4s ease; }
+    .lp-prog-text   { font-size: 0.56rem; color: var(--dim); white-space: nowrap; }
+
+    /* ── QUEST VIEW ── */
+    .lq-container { display: flex; flex-direction: column; gap: 9px; padding: 2px 0; animation: rowIn 0.2s ease; }
+    .lq-header    { display: flex; align-items: center; gap: 7px; }
+    .lq-back {
+      background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--dim);
+      font-size: 0.58rem; padding: 3px 9px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; font-family: inherit; flex-shrink: 0;
+    }
+    .lq-back:hover { border-color: var(--accent); color: var(--accent); }
+    .lq-title    { flex: 1; font-size: 0.65rem; font-weight: 700; text-align: center; }
+    .lq-progress { font-size: 0.56rem; color: var(--dim); white-space: nowrap; flex-shrink: 0; }
+    .lq-quest-nav { display: flex; gap: 5px; justify-content: center; }
+    .lq-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); cursor: pointer; transition: all 0.15s;
+    }
+    .lq-dot.done    { background: var(--green); }
+    .lq-dot.current { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+    .lq-q-label  { font-size: 0.53rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.09em; }
+    .lq-question { font-size: 0.72rem; font-weight: 600; line-height: 1.45; }
+    .lq-options  { display: flex; flex-direction: column; gap: 4px; }
+    .lq-option {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text); font-size: 0.63rem; padding: 7px 11px; border-radius: 7px;
+      cursor: pointer; text-align: left; transition: all 0.15s; font-family: inherit; line-height: 1.35;
+    }
+    .lq-option:hover:not(:disabled) { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.05); }
+    .lq-option.correct { border-color: rgba(0,255,136,0.5);  background: rgba(0,255,136,0.08); color: var(--green); }
+    .lq-option.wrong   { border-color: rgba(255,0,102,0.5);  background: rgba(255,0,102,0.08); color: var(--pink);  }
+    .lq-hint {
+      font-size: 0.59rem; color: var(--dim); padding: 5px 9px;
+      background: rgba(255,170,0,0.05); border-left: 2px solid rgba(255,170,0,0.3);
+      border-radius: 0 5px 5px 0; line-height: 1.4;
+    }
+    .lq-term {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 7px; padding: 7px 10px;
+    }
+    .lq-prompt { color: var(--green); font-size: 0.75rem; font-family: 'Courier New',monospace; flex-shrink: 0; }
+    .lq-term-input {
+      flex: 1; background: none; border: none; color: var(--text);
+      font-size: 0.7rem; font-family: 'Courier New',monospace; outline: none;
+    }
+    .lq-term-input::placeholder { color: rgba(139,148,158,0.35); }
+    .lq-term-input.term-correct { color: var(--green); }
+    .lq-term-input.term-wrong   { color: var(--pink);  }
+    .lq-run-btn {
+      align-self: flex-end; background: rgba(0,212,255,0.07);
+      border: 1px solid rgba(0,212,255,0.2); color: var(--accent);
+      font-size: 0.6rem; padding: 5px 13px; border-radius: 6px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .lq-run-btn:hover { background: rgba(0,212,255,0.14); }
+    .lq-feedback { min-height: 20px; }
+    .lq-exp {
+      font-size: 0.6rem; padding: 6px 9px; border-radius: 6px; line-height: 1.45;
+    }
+    .lq-exp.ok  { background: rgba(0,255,136,0.07);  border: 1px solid rgba(0,255,136,0.18); color: var(--green); }
+    .lq-exp.err { background: rgba(255,0,102,0.07);  border: 1px solid rgba(255,0,102,0.18); color: var(--pink);  }
+    .lq-complete {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 7px; padding: 18px 10px; text-align: center;
+    }
+    .lq-complete-badge { font-size: 2.8rem; animation: sigilPulse 2s ease-in-out infinite; }
+    .lq-complete-title { font-size: 0.95rem; font-weight: 800; color: var(--green); }
+    .lq-complete-sub   { font-size: 0.62rem; color: var(--dim); }
+    .lq-complete-msg   { font-size: 0.6rem; color: var(--dim); max-width: 220px; line-height: 1.45; }
+    .lq-next-level-btn {
+      margin-top: 6px; background: rgba(0,255,136,0.07);
+      border: 1px solid rgba(0,255,136,0.24); color: var(--green);
+      font-size: 0.63rem; padding: 6px 15px; border-radius: 7px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .lq-next-level-btn:hover { background: rgba(0,255,136,0.14); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 820px) {
@@ -691,63 +765,325 @@ const BADGE_META = {
 
 const BADGE_ORDER = ['shishya','sainik','veer','kshatriya','maharathi','atirathi'];
 
-const QUEST_META = {
-  first_blood:   { name:'First Blood',      diff:'beginner',     tier:0, reward:0,   desc:'Join the empire and ignite your war chest' },
-  land_grab:     { name:'Land Grab',        diff:'beginner',     tier:0, reward:50,  desc:'Merge your first PR and claim territory' },
-  test_dharma:   { name:'Test Dharma',      diff:'beginner',     tier:0, reward:75,  desc:'Merge a PR that includes test files' },
-  bug_scout:     { name:'Bug Scout',        diff:'beginner',     tier:0, reward:60,  desc:'Find at least one bug with /vibe-scout' },
-  war_chest:     { name:'War Chest',        diff:'intermediate', tier:1, reward:100, desc:'Accumulate 500 vibe-gems total' },
-  veer_surge:    { name:'Veer Surge',       diff:'intermediate', tier:1, reward:150, desc:'Merge 5 pull requests total' },
-  karna_eye:     { name:"Karna's Eye",      diff:'advanced',     tier:2, reward:200, desc:'Find a CRITICAL severity bug' },
-  atirathi_path: { name:"Atirathi's Path",  diff:'legendary',    tier:3, reward:500, desc:'Find 10 critical bugs — become matchless' },
-};
+// ── GIT LEARNING QUEST SYSTEM ────────────────────────────────────────────────
 
-const QUEST_ORDER = ['first_blood','land_grab','test_dharma','bug_scout','war_chest','veer_surge','karna_eye','atirathi_path'];
-const TIER_LABEL  = ['Any badge','⚔️ Sainik+','🏹 Veer+','🛡️ Kshatriya+','🔱 Maharathi+','⚡ Atirathi'];
+const GIT_LEVELS = [
+  {
+    id: 'shishya', title: 'Level 1 — Git Foundations',
+    desc: 'Master the core workflow: init, stage, commit, and log.',
+    quests: [
+      { type:'mcq', q:'Which command initializes a new Git repository in the current folder?',
+        opts:['git start','git init','git new','git create'], ans:1,
+        exp:'`git init` creates a hidden `.git` directory and sets up an empty repository.' },
+      { type:'mcq', q:'Which command shows the current state of your working tree — staged files, unstaged changes, and untracked files?',
+        opts:['git log','git show','git status','git diff'], ans:2,
+        exp:'`git status` is the go-to command for seeing what is staged, modified, or untracked.' },
+      { type:'terminal', q:'Stage ALL changes in the current directory so they are ready to commit.',
+        accept:['git add .','git add -A','git add --all'],
+        hint:'Use `git add` followed by a dot (.) or the -A flag to include everything.' },
+      { type:'terminal', q:'Create a commit with the message: initial commit',
+        accept:['git commit -m "initial commit"',"git commit -m 'initial commit'"],
+        hint:'Use `git commit -m` followed by your message in quotes.' },
+      { type:'mcq', q:'Which command displays the commit history of the current branch?',
+        opts:['git history','git log','git show','git timeline'], ans:1,
+        exp:'`git log` displays commits in reverse chronological order — newest first.' },
+    ]
+  },
+  {
+    id: 'sainik', title: 'Level 2 — Branching & Remotes',
+    desc: 'Work with branches, push to remotes, and clone repositories.',
+    quests: [
+      { type:'terminal', q:'Create a new branch named "feature". (Any valid syntax is accepted.)',
+        accept:['git branch feature','git checkout -b feature','git switch -c feature'],
+        hint:'`git branch <name>` creates the branch. `git checkout -b <name>` creates and switches in one step.' },
+      { type:'mcq', q:'What does `git checkout -b feature` do?',
+        opts:['Deletes the branch named feature','Creates a new branch called feature and switches to it','Merges feature into the current branch','Renames the current branch to feature'], ans:1,
+        exp:'The `-b` flag tells checkout to create the branch before switching, saving you a separate `git branch` call.' },
+      { type:'mcq', q:'Which command downloads changes from the remote WITHOUT merging them into your current branch?',
+        opts:['git pull','git clone','git fetch','git sync'], ans:2,
+        exp:'`git fetch` updates your remote-tracking refs (e.g. origin/main) without touching your local branch. `git pull` fetches AND merges.' },
+      { type:'terminal', q:'Push your local "feature" branch to the remote named "origin".',
+        accept:['git push origin feature'],
+        hint:'The syntax is `git push <remote> <branch>`.' },
+      { type:'mcq', q:'What does `git clone <url>` create?',
+        opts:['An empty repository with no history','A full copy of the remote repository with all history and a configured origin remote','Only the latest commit snapshot','A bare repository for server use'], ans:1,
+        exp:'`git clone` downloads the entire history and automatically sets `origin` as the remote pointing back to the source URL.' },
+    ]
+  },
+  {
+    id: 'veer', title: 'Level 3 — Merging & Collaboration',
+    desc: 'Integrate branches, resolve conflicts, stash work, and collaborate.',
+    quests: [
+      { type:'terminal', q:'Merge the branch named "feature" into your current branch.',
+        accept:['git merge feature'],
+        hint:'`git merge <branch>` integrates the given branch into whichever branch you are currently on.' },
+      { type:'mcq', q:'A merge conflict occurs when:',
+        opts:['Two branches have no commit history in common','Both branches modified the same lines in different ways and Git cannot auto-resolve','A branch is deleted before being merged','The remote repository is unreachable'], ans:1,
+        exp:'Git can auto-merge non-overlapping changes. A conflict only happens when the same lines differ between branches — you must manually choose the correct version.' },
+      { type:'mcq', q:'What is the key difference between `git fetch` and `git pull`?',
+        opts:['`git fetch` only works on main','`git pull` = `git fetch` + `git merge` — it downloads AND integrates remote changes','`git fetch` deletes local branches that no longer exist remotely','There is no practical difference'], ans:1,
+        exp:'`git fetch` is safe — it updates remote-tracking refs without modifying your working branch. `git pull` immediately merges, which can create unexpected conflicts.' },
+      { type:'mcq', q:'What does `git stash` do?',
+        opts:['Permanently deletes uncommitted changes','Saves uncommitted changes onto a stack and cleans your working directory so you can switch context','Commits all staged files with an auto-generated message','Pushes local changes to a stash branch on the remote'], ans:1,
+        exp:'`git stash push` saves dirty state; `git stash pop` restores it. Great for switching branches without a half-finished commit.' },
+      { type:'terminal', q:'Stash your current uncommitted changes to set them aside temporarily.',
+        accept:['git stash','git stash push','git stash save'],
+        hint:'It is just two words: `git stash`.' },
+    ]
+  },
+  {
+    id: 'kshatriya', title: 'Level 4 — Advanced Git',
+    desc: 'Rebase, cherry-pick, reset history, and use the reflog safety net.',
+    quests: [
+      { type:'mcq', q:'What is the main advantage of `git rebase` over `git merge`?',
+        opts:['Rebase always creates a merge commit for clarity','Rebase replays commits onto a new base, producing a clean linear history without merge commits','Rebase is faster than merge for large repositories','Rebase works only on remote branches'], ans:1,
+        exp:'Rebase rewrites commit hashes but gives you a tidy, linear history. Merge preserves the original branch topology with a merge commit.' },
+      { type:'mcq', q:'What does `git cherry-pick <commit-hash>` do?',
+        opts:['Deletes the specified commit','Applies the changes introduced by a single commit onto your current branch','Squashes all commits between HEAD and the hash','Reverts the specified commit and creates a new revert commit'], ans:1,
+        exp:'Cherry-pick lets you copy any commit from anywhere in history to your current branch — useful for back-porting a bug fix without merging an entire branch.' },
+      { type:'mcq', q:'What does `git reset --hard HEAD~1` do?',
+        opts:['Moves HEAD back one commit but keeps all file changes staged','Moves HEAD back one commit and DISCARDS all changes from that commit permanently','Creates a new commit that undoes the previous commit','Stages the contents of the previous commit'], ans:1,
+        exp:'`--hard` is destructive — the commit and all its file changes are gone from the working tree. Use `--soft` if you want to keep the changes staged.' },
+      { type:'terminal', q:'Undo the last commit but keep its changes staged and ready to re-commit.',
+        accept:['git reset --soft HEAD~1','git reset --soft HEAD^'],
+        hint:'Use `git reset` with the `--soft` flag. `HEAD~1` means one commit before HEAD.' },
+      { type:'mcq', q:'What does `git reflog` show?',
+        opts:['Only commits that have been pushed to a remote','A complete log of everywhere HEAD has pointed — including resets, rebases, and checkouts','The history of a remote branch','All tags and releases in the repository'], ans:1,
+        exp:'`git reflog` is your safety net. Even after a `--hard` reset, the "lost" commits still appear in reflog for ~90 days, letting you recover them with `git checkout <hash>`.' },
+    ]
+  },
+  {
+    id: 'maharathi', title: 'Level 5 — Git Internals & Workflows',
+    desc: 'Understand Git objects, tags, bisect, interactive rebase, and blame.',
+    quests: [
+      { type:'mcq', q:'Git stores content as four internal object types. Which of these is NOT one of them?',
+        opts:['blob (file content)','tree (directory listing)','commit','branch'], ans:3,
+        exp:'Branches are simply pointers (text files containing a commit hash) — not stored objects. The four object types are: blob, tree, commit, and tag.' },
+      { type:'terminal', q:'Create a lightweight tag named "v1.0" pointing at the current commit.',
+        accept:['git tag v1.0'],
+        hint:'`git tag <name>` creates a lightweight tag at HEAD.' },
+      { type:'mcq', q:'What workflow does `git bisect` enable?',
+        opts:['Interactive rebase of the last N commits','Binary search through commit history to identify which commit introduced a bug','Squashing multiple commits into one','Generating a diff between two branches'], ans:1,
+        exp:'You mark a known-good commit and a known-bad commit, then `git bisect` checks out the midpoint. You mark it good/bad and the range halves, finding the culprit in O(log N) steps.' },
+      { type:'mcq', q:'What does `git rebase -i HEAD~3` let you do?',
+        opts:['Fetch the last 3 commits from the remote','Interactively edit, squash, reorder, or drop the last 3 commits before pushing','Create 3 new branches from HEAD','Tag the last 3 commits in sequence'], ans:1,
+        exp:'Interactive rebase opens an editor showing the last N commits as pick/squash/fixup/reword/drop actions — the standard way to clean up a branch before opening a PR.' },
+      { type:'mcq', q:'What does `git blame <file>` output?',
+        opts:['Lines that contain bugs or code smells','Each line of the file annotated with the commit hash, author, and date of its last change','All commits that ever touched the file','The uncommitted diff for that file'], ans:1,
+        exp:'`git blame` is essential for code archaeology — it tells you who wrote each line and when, so you can find the original context in `git log -p <hash>`.' },
+    ]
+  },
+  {
+    id: 'atirathi', title: 'Level 6 — Expert Patterns',
+    desc: 'Submodules, worktrees, hooks, signed commits, and history rewriting.',
+    quests: [
+      { type:'mcq', q:'What is a Git submodule?',
+        opts:['A plugin system for extending git commands','A Git repository embedded as a subdirectory inside another repository, pinned to a specific commit','A type of long-lived branch for features','A configuration section in .gitconfig'], ans:1,
+        exp:'Submodules allow one repo to include another as a versioned dependency. Running `git submodule update --init` clones them; each submodule is pinned to an exact commit hash.' },
+      { type:'mcq', q:'What does `git worktree add ../hotfix hotfix-branch` accomplish?',
+        opts:['Creates a new remote called hotfix','Checks out hotfix-branch into a separate directory so two branches can be worked on simultaneously without stashing','Merges hotfix-branch into the current branch','Deletes and recreates the hotfix branch'], ans:1,
+        exp:'`git worktree` lets you check out multiple branches into different directories from a single repo clone — no stashing or re-cloning needed to context-switch.' },
+      { type:'mcq', q:'Where do client-side Git hooks live in a repository?',
+        opts:['.github/hooks/','The .git/hooks/ directory','./git-hooks/ (configured via core.hooksPath)','Defined as scripts in package.json'], ans:1,
+        exp:'Client-side hooks are executable scripts inside `.git/hooks/`. Common ones: `pre-commit`, `commit-msg`, `pre-push`. They are not committed to the repo by default.' },
+      { type:'terminal', q:'Create a GPG-signed commit with the message: secure release',
+        accept:['git commit -S -m "secure release"','git commit -S -m \'secure release\'','git commit --gpg-sign -m "secure release"'],
+        hint:'The flag for GPG signing is `-S` (uppercase S). Combine it with `-m` for the message.' },
+      { type:'mcq', q:'What is the primary use case for `git filter-repo` (formerly `git filter-branch`)?',
+        opts:['Filtering output of `git log` by author','Rewriting every commit in history — used to permanently remove sensitive files or secrets from all past commits','Filtering which files are staged before a commit','Removing stale remote branches from the local ref list'], ans:1,
+        exp:'`git filter-repo` is the correct tool when a secret or large binary was accidentally committed and must be purged from every commit in the repo\'s history before a force-push.' },
+    ]
+  },
+];
 
-function renderQuestBoard(empire) {
-  const players = Object.entries(empire.players || {});
-  if (players.length === 0) return `<div class="loading-msg" style="height:120px">No warriors yet.<br><br><code>/vibe-join @you</code></div>`;
+// ── LEARNING STATE (localStorage) ────────────────────────────────────────────
 
-  return QUEST_ORDER.map((id, idx) => {
-    const q = QUEST_META[id]; if (!q) return '';
+function getLearningState() {
+  try { return JSON.parse(localStorage.getItem('gitempire_learn') || '{}'); }
+  catch { return {}; }
+}
+function saveLearningState(s) { localStorage.setItem('gitempire_learn', JSON.stringify(s)); }
+function getLevelState(id) { const s = getLearningState(); return s[id] || { completed: [], badge_earned: false }; }
+function setLevelState(id, data) { const s = getLearningState(); s[id] = data; saveLearningState(s); }
 
-    const completedBy = [], activeBy = [];
-    for (const [name, p] of players) {
-      const prog = (p.quest_progress || {})[id];
-      if (prog?.status === 'completed') completedBy.push(name);
-      else if ((p.active_quests || []).includes(id)) activeBy.push(name);
-    }
+let currentLearningLevel = null;
+let currentLearningQuest = 0;
+let learningView = 'levels'; // 'levels' | 'quest'
 
-    const chips = [
-      ...completedBy.map(n => `<span class="qb-chip done" onclick="openPlayerModal('${n}')" title="Completed">${n.replace(/^@/,'')} ✓</span>`),
-      ...activeBy.map(n   => `<span class="qb-chip active" onclick="openPlayerModal('${n}')" title="In progress">${n.replace(/^@/,'')} ◌</span>`),
-    ].join('');
+// ── LEARNING RENDERERS ────────────────────────────────────────────────────────
 
-    const rewardHtml = q.reward > 0
-      ? `<div class="qb-reward">+${q.reward}💎</div>`
-      : `<div class="qb-reward free">+100💎</div>`;
-
-    const total = players.length;
-    const doneCount = completedBy.length;
-
-    return `<div class="qb-row" style="animation-delay:${idx*0.045}s">
-      <div class="qb-left">
-        <div class="qb-title">
-          <span class="qb-name">${q.name}</span>
-          <span class="qb-diff ${q.diff}">${q.diff}</span>
+function renderLearningPath() {
+  return '<div class="lp-wrap">' + GIT_LEVELS.map((lvl, idx) => {
+    const meta = BADGE_META[lvl.id];
+    const state = getLevelState(lvl.id);
+    const done = state.completed.length, total = lvl.quests.length;
+    const pct  = Math.round((done / total) * 100);
+    const prevComplete = idx === 0 || getLevelState(GIT_LEVELS[idx - 1].id).badge_earned;
+    const locked   = !prevComplete;
+    const complete = state.badge_earned;
+    const cls = locked ? 'locked' : complete ? 'complete' : done > 0 ? 'active' : '';
+    return `<div class="lp-level ${cls}" style="animation-delay:${idx*0.05}s" ${!locked ? `onclick="openLearningLevel('${lvl.id}')"` : ''}>
+      <div class="lp-level-left">
+        <div class="lp-badge-wrap">
+          <span class="lp-badge-emoji">${meta.emoji}</span>
+          ${complete ? '<span class="lp-badge-tick">✓</span>' : ''}
         </div>
-        <div class="qb-meta">
-          <span class="qb-req">${TIER_LABEL[q.tier]}</span>
-          <span>·</span>
-          <span>${doneCount}${total > 0 ? '/'+total : ''} done</span>
+        <div class="lp-level-info">
+          <div class="lp-level-title">${lvl.title}</div>
+          <div class="lp-level-desc">${lvl.desc}</div>
         </div>
-        <div class="qb-desc">${q.desc}</div>
-        <div class="qb-warriors">${chips || '<span class="qb-none">no one yet</span>'}</div>
       </div>
-      ${rewardHtml}
+      <div class="lp-level-right">
+        ${locked
+          ? `<span class="lp-locked-icon">🔒</span>`
+          : `<div class="lp-prog-wrap">
+               <div class="lp-prog-bar"><div class="lp-prog-fill" style="width:${pct}%"></div></div>
+               <span class="lp-prog-text">${done}/${total}</span>
+             </div>`}
+      </div>
     </div>`;
+  }).join('') + '</div>';
+}
+
+function openLearningLevel(levelId) {
+  currentLearningLevel = levelId;
+  const level = GIT_LEVELS.find(l => l.id === levelId);
+  const state = getLevelState(levelId);
+  const next  = level.quests.findIndex((_, i) => !state.completed.includes(i));
+  currentLearningQuest = next === -1 ? 0 : next;
+  learningView = 'quest';
+  refreshLearningTab();
+}
+
+function backToLevels() { learningView = 'levels'; refreshLearningTab(); }
+
+function refreshLearningTab() {
+  const wrap = document.getElementById('leaderboard-wrap');
+  if (wrap) wrap.innerHTML = learningView === 'quest' ? renderQuestView() : renderLearningPath();
+}
+
+function renderQuestView() {
+  const level = GIT_LEVELS.find(l => l.id === currentLearningLevel);
+  const meta  = BADGE_META[currentLearningLevel];
+  const state = getLevelState(currentLearningLevel);
+  if (state.badge_earned) return renderLevelComplete(level, meta);
+  const quest = level.quests[currentLearningQuest];
+  const dots  = level.quests.map((_, i) => {
+    const cls = state.completed.includes(i) ? 'done' : i === currentLearningQuest ? 'current' : '';
+    return `<span class="lq-dot ${cls}" onclick="jumpToQuest(${i})" title="Quest ${i+1}"></span>`;
   }).join('');
+  const body = quest.type === 'mcq'
+    ? renderMCQ(quest, currentLearningQuest)
+    : renderTerminal(quest, currentLearningQuest);
+  return `<div class="lq-container">
+    <div class="lq-header">
+      <button class="lq-back" onclick="backToLevels()">← Levels</button>
+      <span class="lq-title">${meta.emoji} ${level.title}</span>
+      <span class="lq-progress">${state.completed.length}/${level.quests.length}</span>
+    </div>
+    <div class="lq-quest-nav">${dots}</div>
+    ${body}
+  </div>`;
+}
+
+function renderMCQ(quest, idx) {
+  return `<div id="quest-card">
+    <div class="lq-q-label">Quest ${idx + 1} — Multiple Choice</div>
+    <div class="lq-question">${quest.q}</div>
+    <div class="lq-options">
+      ${quest.opts.map((opt, i) => `<button class="lq-option" onclick="submitMCQ(${idx},${i})">${opt}</button>`).join('')}
+    </div>
+    <div class="lq-feedback" id="lq-fb"></div>
+  </div>`;
+}
+
+function renderTerminal(quest, idx) {
+  return `<div id="quest-card">
+    <div class="lq-q-label">Quest ${idx + 1} — Terminal</div>
+    <div class="lq-question">${quest.q}</div>
+    <div class="lq-hint">💡 ${quest.hint}</div>
+    <div class="lq-term">
+      <span class="lq-prompt">$</span>
+      <input id="lq-input" class="lq-term-input" type="text" placeholder="type your git command…"
+             onkeydown="if(event.key==='Enter')submitTerminal(${idx})"
+             autocomplete="off" spellcheck="false"/>
+    </div>
+    <button class="lq-run-btn" onclick="submitTerminal(${idx})">Run ↵</button>
+    <div class="lq-feedback" id="lq-fb"></div>
+  </div>`;
+}
+
+function submitMCQ(questIdx, choiceIdx) {
+  const level = GIT_LEVELS.find(l => l.id === currentLearningLevel);
+  const quest = level.quests[questIdx];
+  const correct = choiceIdx === quest.ans;
+  document.querySelectorAll('.lq-option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === quest.ans) btn.classList.add('correct');
+    else if (i === choiceIdx && !correct) btn.classList.add('wrong');
+  });
+  const fb = document.getElementById('lq-fb');
+  fb.innerHTML = `<div class="lq-exp ${correct ? 'ok' : 'err'}">${correct ? '✓ Correct! ' : '✗ Not quite. '}${quest.exp}</div>`;
+  if (correct) { markQuestDone(questIdx); setTimeout(nextQuest, 1600); }
+}
+
+function submitTerminal(questIdx) {
+  const level = GIT_LEVELS.find(l => l.id === currentLearningLevel);
+  const quest = level.quests[questIdx];
+  const input = document.getElementById('lq-input');
+  const val   = (input.value || '').trim();
+  const correct = quest.accept.some(a => val === a);
+  input.disabled = true;
+  const fb = document.getElementById('lq-fb');
+  if (correct) {
+    input.classList.add('term-correct');
+    fb.innerHTML = `<div class="lq-exp ok">✓ Correct! Well executed, warrior.</div>`;
+    markQuestDone(questIdx);
+    setTimeout(nextQuest, 1300);
+  } else {
+    input.classList.add('term-wrong');
+    fb.innerHTML = `<div class="lq-exp err">✗ Not quite. Expected: <code>${quest.accept[0]}</code></div>`;
+    setTimeout(() => {
+      input.value = ''; input.disabled = false;
+      input.classList.remove('term-wrong'); fb.innerHTML = ''; input.focus();
+    }, 2000);
+  }
+}
+
+function markQuestDone(questIdx) {
+  const state = getLevelState(currentLearningLevel);
+  if (!state.completed.includes(questIdx)) state.completed.push(questIdx);
+  const level = GIT_LEVELS.find(l => l.id === currentLearningLevel);
+  if (state.completed.length === level.quests.length && !state.badge_earned) {
+    state.badge_earned = true;
+    showBadgeCelebration('You', currentLearningLevel);
+  }
+  setLevelState(currentLearningLevel, state);
+}
+
+function nextQuest() {
+  const level = GIT_LEVELS.find(l => l.id === currentLearningLevel);
+  const state = getLevelState(currentLearningLevel);
+  if (state.badge_earned) { refreshLearningTab(); return; }
+  const next = level.quests.findIndex((_, i) => !state.completed.includes(i));
+  if (next !== -1) currentLearningQuest = next;
+  refreshLearningTab();
+}
+
+function jumpToQuest(idx) { currentLearningQuest = idx; refreshLearningTab(); }
+
+function renderLevelComplete(level, meta) {
+  const levelIdx = GIT_LEVELS.indexOf(level);
+  const nextLevel = GIT_LEVELS[levelIdx + 1];
+  return `<div class="lq-complete">
+    <div class="lq-complete-badge">${meta.emoji}</div>
+    <div class="lq-complete-title">${meta.label} (${meta.sanskrit})</div>
+    <div class="lq-complete-sub">Level ${levelIdx + 1} Mastered ✓</div>
+    <div class="lq-complete-msg">${level.desc}</div>
+    <button class="lq-next-level-btn" onclick="backToLevels()">
+      ${nextLevel ? `→ Next: ${nextLevel.title}` : '← All Levels'}
+    </button>
+  </div>`;
 }
 
 const NEON = ['#00ff88','#ff0066','#00d4ff','#ffaa00','#cc44ff','#ff4444','#44ffcc','#ff8800'];
@@ -871,9 +1207,13 @@ function switchTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (!empireData) return;
-  document.getElementById('leaderboard-wrap').innerHTML =
-    tab === 'quests' ? renderQuestBoard(empireData) : renderLeaderboard(empireData, tab);
+  if (tab === 'quests') {
+    learningView = 'levels';
+    document.getElementById('leaderboard-wrap').innerHTML = renderLearningPath();
+  } else {
+    if (!empireData) return;
+    document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, tab);
+  }
 }
 
 function showBadgeCelebration(playerName, newBadge) {
@@ -989,8 +1329,9 @@ async function load() {
       });
     }
 
-    document.getElementById('leaderboard-wrap').innerHTML =
-      currentTab === 'quests' ? renderQuestBoard(empireData) : renderLeaderboard(empireData, currentTab);
+    if (currentTab !== 'quests') {
+      document.getElementById('leaderboard-wrap').innerHTML = renderLeaderboard(empireData, currentTab);
+    }
 
     const totalWars  = (empireData.wars||[]).filter(w=>w.status==='active').length;
     const totalGems  = Object.values(empireData.players).reduce((s,p)=>s+(p.vibe_gems||0),0);

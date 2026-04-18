@@ -54,20 +54,20 @@ function buildIssueBody(quest) {
 
   const steps = buildSteps(quest);
 
-  return `## ⚔️ Quest: ${quest.name}
+  return `## ${quest.name}
 
 **Difficulty:** ${quest.difficulty}
-**Badge Required to start:** ${reqMeta.emoji} ${reqMeta.label} (${reqMeta.sanskrit}) or higher
-**Reward:** ${rewardText}
-**Quest ID:** \`${quest.id}\`
+**Badge Required:** ${reqMeta.emoji} ${reqMeta.label} (${reqMeta.sanskrit}) or higher
+**Gem Reward:** ${rewardText}
+**Contribution ID:** \`${quest.id}\`
 
 ---
 
-### What This Quest Is
+### About This Contribution
 
 ${quest.description}
 
-### How to Complete
+### How to Earn This
 
 ${quest.hint}
 
@@ -75,18 +75,19 @@ ${quest.hint}
 
 ${steps}
 
-### How the Quest System Works
+### Tracking Your Progress
 
-- **Start a quest:** Post \`/vibe-quest start ${quest.id}\` as a comment on any issue
-- **Complete automatically:** The relevant warrior script detects your action and awards the bonus gems — no manual confirmation needed
-- **Check your progress:** Post \`/vibe-quest list\` to see all quest statuses, or open the live dashboard at https://charan-s108.github.io/GitEmpire/ (⚔️ Quests tab)
-- **Max 3 active quests** at once — complete one before starting another
+- **Activate tracking:** Post \`/vibe-quest start ${quest.id}\` as a comment on any issue
+- **Completes automatically:** The relevant warrior script detects your contribution and awards gems — no manual action needed
+- **Check status:** Post \`/vibe-quest list\` to see all contribution milestones with current progress
+- **Max 3 active** at once
 
-> This issue is a reference board. Quest completion is tracked in \`empire.json\` via GitHub Actions — not by closing this issue.
+> **Note:** The badge label on this issue shows the contributor skill level required — not a learning quest level.
+> Contribution completion is tracked in \`empire.json\` via GitHub Actions.
 
 ---
 
-*Part of the [GitEmpire](https://github.com/charan-s108/GitEmpire) quest system · Powered by Mahabharata warriors as recursive AI agents*`;
+*Part of [GitEmpire](https://github.com/charan-s108/GitEmpire) · Mahabharata warriors as recursive AI agents · GitAgent Hackathon 2026*`;
 }
 
 function buildSteps(quest) {
@@ -208,7 +209,7 @@ async function createIssue(owner, repo, token, quest) {
       Accept: 'application/vnd.github+json',
     },
   }, JSON.stringify({
-    title: `⚔️ Quest: ${quest.name} [${quest.difficulty}]`,
+    title: `⚔️ ${quest.name} — ${quest.difficulty} Contribution [${reqBadgeKey}]`,
     body,
     labels,
   }));
