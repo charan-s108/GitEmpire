@@ -1,8 +1,8 @@
 {
   "meta": {
     "version": "1.0.0",
-    "last_updated": "2026-04-17T10:42:11.814Z",
-    "total_warriors": 3,
+    "last_updated": "2026-04-18T03:04:36.741Z",
+    "total_warriors": 4,
     "leaderboard_resets": {
       "weekly_reset": "2026-04-17T10:42:08.554Z",
       "monthly_reset": "2026-04-17T10:42:08.554Z"
@@ -135,6 +135,35 @@
         "bug_scout": {
           "status": "completed",
           "completed_at": "2026-04-17T10:42:11.813Z"
+        }
+      },
+      "active_quests": []
+    },
+    "@charan-s108": {
+      "vibe_gems": 100,
+      "weekly_gems": 100,
+      "monthly_gems": 100,
+      "acres": 0,
+      "plots": [],
+      "streak": 1,
+      "joined": "2026-04-18T03:04:36.741Z",
+      "last_active": "2026-04-18T03:04:36.741Z",
+      "wars_won": 0,
+      "wars_lost": 0,
+      "badge": "sainik",
+      "badge_history": [
+        {
+          "badge": "sainik",
+          "earned_at": "2026-04-18T03:04:36.741Z"
+        }
+      ],
+      "bugs_found": 0,
+      "critical_bugs_found": 0,
+      "prs_merged": 0,
+      "quest_progress": {
+        "first_blood": {
+          "status": "completed",
+          "completed_at": "2026-04-18T03:04:36.741Z"
         }
       },
       "active_quests": []
