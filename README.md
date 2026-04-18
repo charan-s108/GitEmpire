@@ -23,32 +23,6 @@ PRs become land. Bugs become bounties. Every commit echoes through the ages.
 
 ---
 
-## 🎬 Demo
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     DEMO VIDEO
-     Replace this block with your screen recording once captured.
-
-     Recommended: record `npm run demo` in your terminal (shows all 8 steps
-     + the rainbow ANSI scanner + the neon SVG preview opening in browser).
-
-     Embed options:
-       • GitHub-hosted MP4:  <video src="assets/demo.mp4" controls width="100%"/>
-       • YouTube:            [![Demo](assets/thumbnail.png)](https://youtu.be/YOUR_ID)
-       • GIF (< 10 MB):      ![Demo](assets/demo.gif)
-       Drop your video file into assets/ — it's already in the repo.
-     ════════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-> 📹 **Demo video coming soon** — record with `npm run demo` and drop it here.
->
-> *(replace this block with `<video src="assets/demo.mp4" controls width="100%"/>` or a YouTube embed)*
-
-</div>
-
----
-
 ## 🗺️ Architecture
 
 ![Architecture](./assets/architecture.png)
