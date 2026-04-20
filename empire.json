@@ -1,17 +1,17 @@
 {
   "meta": {
     "version": "1.0.0",
-    "last_updated": "2026-04-18T03:07:05.902Z",
+    "last_updated": "2026-04-20T02:48:23.467Z",
     "total_warriors": 4,
     "leaderboard_resets": {
-      "weekly_reset": "2026-04-17T10:42:08.554Z",
+      "weekly_reset": "2026-04-20T02:48:23.467Z",
       "monthly_reset": "2026-04-17T10:42:08.554Z"
     }
   },
   "players": {
     "@alice": {
       "vibe_gems": 1180,
-      "weekly_gems": 1230,
+      "weekly_gems": 0,
       "monthly_gems": 1230,
       "acres": 4,
       "plots": [
@@ -59,7 +59,7 @@
     },
     "@bob": {
       "vibe_gems": 225,
-      "weekly_gems": 250,
+      "weekly_gems": 0,
       "monthly_gems": 250,
       "acres": 2,
       "plots": [
@@ -98,7 +98,7 @@
     },
     "@charan": {
       "vibe_gems": 538,
-      "weekly_gems": 538,
+      "weekly_gems": 0,
       "monthly_gems": 538,
       "acres": 8,
       "plots": [
@@ -141,7 +141,7 @@
     },
     "@charan-s108": {
       "vibe_gems": 100,
-      "weekly_gems": 100,
+      "weekly_gems": 0,
       "monthly_gems": 100,
       "acres": 0,
       "plots": [],
